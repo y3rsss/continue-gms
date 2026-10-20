@@ -1,6 +1,7 @@
-import { SORT_OPTIONS, type GamesPage, type SortOption } from "../shared/types.js";
+import { LISTS, SORT_OPTIONS, type GamesPage, type List, type SortOption } from "../shared/types.js";
 import { cacheFor, errorResponse } from "./_lib/http.js";
 import {
+  LIST_PARAMS,
   PLATFORM_IDS,
   SORT_ORDERING,
   rawgFetch,
@@ -9,7 +10,6 @@ import {
   type RawgList,
 } from "./_lib/rawg.js";
 
-const PAGE_SIZE = 24;
 const SLUG = /^[a-z0-9-]{1,60}$/;
 
 export async function GET(request: Request): Promise<Response> {
@@ -19,12 +19,18 @@ export async function GET(request: Request): Promise<Response> {
   const platform = params.get("platform") ?? undefined;
   const sort = (params.get("sort") ?? "relevance") as SortOption;
   const search = params.get("search")?.trim().slice(0, 100) || undefined;
+  const list = params.get("list") ?? undefined;
   const page = Number(params.get("page") ?? 1);
+  const size = Number(params.get("size") ?? 24);
 
   if (
     (genre && !SLUG.test(genre)) ||
     (platform && !(platform in PLATFORM_IDS)) ||
     !(sort in SORT_OPTIONS) ||
+    (list && !LISTS.includes(list as List)) ||
+    !Number.isInteger(size) ||
+    size < 1 ||
+    size > 40 ||
     !Number.isInteger(page) ||
     page < 1 ||
     page > 500
@@ -40,7 +46,8 @@ export async function GET(request: Request): Promise<Response> {
       search,
       search_precise: search && "true",
       page,
-      page_size: PAGE_SIZE,
+      page_size: size,
+      ...(list && LIST_PARAMS[list as List]()),
     });
 
     const body: GamesPage = {

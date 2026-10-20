@@ -1,4 +1,4 @@
-import type { Game, Genre, Platform, SortOption } from "../../shared/types.js";
+import type { Game, GameDetails, Genre, List, Platform, SortOption } from "../../shared/types.js";
 
 const BASE_URL = "https://api.rawg.io/api/";
 
@@ -38,6 +38,19 @@ export const PLATFORM_IDS: Record<string, number> = {
   web: 14,
 };
 
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+
+const lastDays = (days: number) => {
+  const now = new Date();
+  return `${isoDate(new Date(now.getTime() - days * 86_400_000))},${isoDate(now)}`;
+};
+
+export const LIST_PARAMS: Record<List, () => Record<string, string>> = {
+  trending: () => ({ dates: lastDays(365), ordering: "-added" }),
+  new: () => ({ dates: lastDays(60), ordering: "-added" }),
+  greats: () => ({ metacritic: "90,100", ordering: "-metacritic" }),
+};
+
 export const SORT_ORDERING: Record<SortOption, string | undefined> = {
   relevance: undefined,
   newest: "-released",
@@ -48,7 +61,12 @@ export const SORT_ORDERING: Record<SortOption, string | undefined> = {
 };
 
 // RAWG's CDN only serves these sizes, anything else 404s
-const IMAGE_SIZES = { card: "crop/600/400", thumb: "resize/200/-" } as const;
+const IMAGE_SIZES = {
+  thumb: "resize/200/-",
+  card: "crop/600/400",
+  shot: "resize/640/-",
+  hero: "resize/1280/-",
+} as const;
 
 export function rawgImage(url: string | null | undefined, size: keyof typeof IMAGE_SIZES) {
   if (!url) return null;
@@ -84,6 +102,19 @@ export interface RawgGame {
   rating: number;
 }
 
+export interface RawgGameDetails extends RawgGame {
+  background_image_additional: string | null;
+  description_raw: string | null;
+  developers?: { name: string }[] | null;
+  publishers?: { name: string }[] | null;
+  website: string | null;
+}
+
+export interface RawgScreenshot {
+  id: number;
+  image: string;
+}
+
 export interface RawgList<T> {
   count: number;
   next: string | null;
@@ -108,4 +139,21 @@ export const toGame = (g: RawgGame): Game => ({
   genres: (g.genres ?? []).map((genre) => ({ slug: genre.slug, name: genre.name })),
   metascore: g.metacritic,
   rating: g.rating,
+});
+
+export const toGameDetails = (
+  g: RawgGameDetails,
+  screenshots: RawgScreenshot[],
+  similar: RawgGame[]
+): GameDetails => ({
+  ...toGame(g),
+  hero: rawgImage(g.background_image, "hero"),
+  description: g.description_raw?.trim() ?? "",
+  developers: (g.developers ?? []).map((d) => d.name),
+  publishers: (g.publishers ?? []).map((p) => p.name),
+  website: g.website || null,
+  screenshots: screenshots
+    .map((shot) => rawgImage(shot.image, "shot"))
+    .filter((url): url is string => url !== null),
+  similar: similar.filter((game) => game.id !== g.id).slice(0, 4).map(toGame),
 });

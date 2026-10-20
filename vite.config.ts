@@ -2,14 +2,16 @@ import path from "node:path";
 import { defineConfig, loadEnv, type Connect, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import * as games from "./api/games";
-import * as genres from "./api/genres";
-import * as platforms from "./api/platforms";
+import * as games from "./api/games.ts";
+import * as genres from "./api/genres.ts";
+import * as platforms from "./api/platforms.ts";
+import * as game from "./api/game.ts";
 
 const routes: Record<string, (request: Request) => Promise<Response>> = {
   "/api/games": games.GET,
   "/api/genres": genres.GET,
   "/api/platforms": platforms.GET,
+  "/api/game": game.GET,
 };
 
 function apiRoutes(): Plugin {

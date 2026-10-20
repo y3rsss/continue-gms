@@ -23,6 +23,16 @@ export interface Game {
   rating: number;
 }
 
+export interface GameDetails extends Game {
+  hero: string | null;
+  description: string;
+  developers: string[];
+  publishers: string[];
+  website: string | null;
+  screenshots: string[];
+  similar: Game[];
+}
+
 export interface GamesPage {
   results: Game[];
   count: number;
@@ -32,10 +42,14 @@ export interface GamesPage {
 export const SORT_OPTIONS = {
   relevance: "Relevance",
   newest: "Release date",
-  added: "Date added",
-  rating: "Average rating",
+  added: "Popularity",
+  rating: "User rating",
   metascore: "Metascore",
   name: "Name",
 } as const;
 
 export type SortOption = keyof typeof SORT_OPTIONS;
+
+export const LISTS = ["trending", "new", "greats"] as const;
+
+export type List = (typeof LISTS)[number];
