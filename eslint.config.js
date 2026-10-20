@@ -21,12 +21,10 @@ export default defineConfig([
     },
   },
   {
-    // Server-side code (Vercel functions, Vite config)
-    files: ["api/**/*.ts", "vite.config.ts"],
+    files: ["api/**/*.ts", "shared/**/*.ts", "vite.config.ts"],
     languageOptions: { globals: globals.node },
   },
   {
-    // shadcn components export variants alongside components by design
     files: ["src/components/ui/**/*.{ts,tsx}"],
     rules: { "react-refresh/only-export-components": "off" },
   },

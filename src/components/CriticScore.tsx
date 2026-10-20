@@ -5,8 +5,7 @@ interface Props {
 }
 
 const CriticScore = ({ score }: Props) => {
-  // eslint-disable-next-line prefer-const
-  let color = score > 75 ? "green" : score > 60 ? "yellow" : "";
+  const color = score > 75 ? "green" : score > 60 ? "yellow" : "";
 
   return (
     <Badge colorScheme={color} fontSize="14px" paddingX={2} borderRadius="4px">

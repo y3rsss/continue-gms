@@ -2,15 +2,23 @@ import path from "node:path";
 import { defineConfig, loadEnv, type Connect, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { GET as rawgProxy } from "./api/rawg";
+import * as games from "./api/games";
+import * as genres from "./api/genres";
+import * as platforms from "./api/platforms";
+
+const routes: Record<string, (request: Request) => Promise<Response>> = {
+  "/api/games": games.GET,
+  "/api/genres": genres.GET,
+  "/api/platforms": platforms.GET,
+};
 
 function apiRoutes(): Plugin {
   const handle: Connect.NextHandleFunction = async (req, res, next) => {
-    if (!req.url || !/^\/api\/rawg(\/|\?|$)/.test(req.url)) return next();
+    const url = new URL(req.url ?? "/", "http://localhost");
+    const route = routes[url.pathname];
+    if (!route) return next();
     try {
-      const response = await rawgProxy(
-        new Request(new URL(req.url, "http://localhost"))
-      );
+      const response = await route(new Request(url));
       res.statusCode = response.status;
       response.headers.forEach((value, name) => res.setHeader(name, value));
       res.end(Buffer.from(await response.arrayBuffer()));
@@ -37,6 +45,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(import.meta.dirname, "./src"),
+        "@shared": path.resolve(import.meta.dirname, "./shared"),
       },
     },
   };

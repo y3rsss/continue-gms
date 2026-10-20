@@ -1,29 +1,15 @@
-import { GameQuery } from "../App";
-import useData from "./useData";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import type { GamesPage } from "@shared/types";
+import { getJson } from "../services/api";
+import type { GameQuery } from "./useGameQuery";
 
-export interface Platform {
-  id:number;
-  name:string;
-  slug:string;
-}
-
-export interface Game {
-    id: number;
-    name: string;
-    background_image: string;
-    parent_platforms: {platform:Platform}[];
-    metacritic: number;
-    rating_top: number;
-}
-
-const useGames = (gameQuery: GameQuery) => 
-  useData<Game>('/games', {
-    params: {
-      genres: gameQuery.genre?.id, 
-      platforms: gameQuery.platform?.id,
-      ordering: gameQuery.sortOrder,
-      search: gameQuery.searchText
-    }}, 
-    [gameQuery]);
+const useGames = (query: GameQuery) =>
+  useInfiniteQuery({
+    queryKey: ["games", query],
+    queryFn: ({ pageParam, signal }) =>
+      getJson<GamesPage>("/api/games", { ...query, page: pageParam }, signal),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+  });
 
 export default useGames;

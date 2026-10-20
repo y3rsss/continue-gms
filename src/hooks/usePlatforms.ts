@@ -1,11 +1,12 @@
-import useData from "./useData";
+import { useQuery } from "@tanstack/react-query";
+import type { Platform } from "@shared/types";
+import { getJson } from "../services/api";
 
-interface Platform {
-    id: number;
-    name: string;
-    slug: string;
-}
-
-const usePlatforms = () => useData<Platform>('/platforms/lists/parents')
+const usePlatforms = () =>
+  useQuery({
+    queryKey: ["platforms"],
+    queryFn: ({ signal }) => getJson<Platform[]>("/api/platforms", {}, signal),
+    staleTime: 24 * 60 * 60 * 1000,
+  });
 
 export default usePlatforms;
