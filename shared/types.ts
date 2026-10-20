@@ -21,8 +21,6 @@ export interface Game {
   metascore: number | null;
   /** 0-5 */
   rating: number;
-  /** most common user rating, 1-5 (0 = unrated) */
-  ratingTop: number;
 }
 
 export interface GamesPage {

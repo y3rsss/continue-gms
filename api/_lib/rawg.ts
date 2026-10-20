@@ -82,7 +82,6 @@ export interface RawgGame {
   genres?: RawgGenre[] | null;
   metacritic: number | null;
   rating: number;
-  rating_top: number;
 }
 
 export interface RawgList<T> {
@@ -109,5 +108,4 @@ export const toGame = (g: RawgGame): Game => ({
   genres: (g.genres ?? []).map((genre) => ({ slug: genre.slug, name: genre.name })),
   metascore: g.metacritic,
   rating: g.rating,
-  ratingTop: g.rating_top,
 });
