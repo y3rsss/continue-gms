@@ -26,7 +26,7 @@ const useGameQuery = () => {
       if (value) next.set(name, value);
       else next.delete(name);
     }
-    navigate({ pathname: "/", search: next.toString() });
+    navigate({ pathname: "/games", search: next.toString() });
   };
 
   return { query, setQuery };

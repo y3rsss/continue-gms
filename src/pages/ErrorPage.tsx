@@ -1,5 +1,6 @@
-import { Box, Heading, Text } from "@chakra-ui/react";
-import { Link, isRouteErrorResponse, useRouteError } from "react-router";
+import { isRouteErrorResponse, useRouteError } from "react-router";
+import Footer from "../components/Footer";
+import GameOver from "../components/GameOver";
 import NavBar from "../components/NavBar";
 
 const ErrorPage = () => {
@@ -7,16 +8,14 @@ const ErrorPage = () => {
   const notFound = isRouteErrorResponse(error) && error.status === 404;
 
   return (
-    <>
+    <div className="grid min-h-svh grid-rows-[auto_1fr_auto]">
+      <title>Game over | Continue?</title>
       <NavBar />
-      <Box padding={5}>
-        <Heading>Oops</Heading>
-        <Text marginY={3}>
-          {notFound ? "This page doesn't exist." : "Something went wrong."}
-        </Text>
-        <Link to="/">Back to all games</Link>
-      </Box>
-    </>
+      <main>
+        <GameOver message={notFound ? "This page doesn't exist." : "Something broke on our side. Reload the page to try again."} />
+      </main>
+      <Footer />
+    </div>
   );
 };
 
