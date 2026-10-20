@@ -15,6 +15,8 @@ const useData = <T>(endpoint:string, requestConfig?: AxiosRequestConfig, deps?: 
     useEffect(() => {
         const controller = new AbortController();
 
+        // TODO: replaced by TanStack Query in the data layer rewrite
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
 
         apiClient
