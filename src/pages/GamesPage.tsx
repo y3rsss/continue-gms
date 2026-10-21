@@ -47,7 +47,10 @@ const GamesPage = () => {
       <div className="flex flex-wrap items-center gap-2">
         <FilterMenu
           label="Platform"
-          options={[{ value: undefined, label: "All" }, ...(platforms ?? []).map((p) => ({ value: p.slug, label: p.name }))]}
+          options={[
+            { value: undefined, label: "All" },
+            ...(platforms ?? []).map((p) => ({ value: p.slug, label: p.name })),
+          ]}
           value={query.platform}
           onChange={(value) => setQuery({ platform: value })}
         />
@@ -57,12 +60,14 @@ const GamesPage = () => {
           value={query.sort}
           onChange={(value) => setQuery({ sort: value as SortOption | undefined })}
         />
-        {query.search && (
-          <Tab onClick={() => setQuery({ search: undefined })}>Clear search ×</Tab>
-        )}
+        {query.search && <Tab onClick={() => setQuery({ search: undefined })}>Clear search ×</Tab>}
         <div className="ml-auto flex" role="group" aria-label="View">
-          <Tab active={view === "list"} onClick={() => setView("list")}>List</Tab>
-          <Tab active={view === "grid"} onClick={() => setView("grid")} className="-ml-[1.5px]">Grid</Tab>
+          <Tab active={view === "list"} onClick={() => setView("list")}>
+            List
+          </Tab>
+          <Tab active={view === "grid"} onClick={() => setView("grid")} className="-ml-[1.5px]">
+            Grid
+          </Tab>
         </div>
       </div>
 

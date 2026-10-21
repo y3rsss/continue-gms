@@ -49,7 +49,10 @@ const BacklogPage = () => {
               ? "Nothing here yet. Open any game and stamp it: Want to play, Playing, Finished or Dropped."
               : `No games marked “${STATUSES[filter!]}” yet.`}
           </p>
-          <Link to="/games" className="label border-2 border-ink px-3 py-2 font-bold hover:bg-ink hover:text-paper">
+          <Link
+            to="/games"
+            className="label border-2 border-ink px-3 py-2 font-bold hover:bg-ink hover:text-paper"
+          >
             Browse the index →
           </Link>
         </div>

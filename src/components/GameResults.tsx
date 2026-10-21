@@ -18,7 +18,15 @@ interface Props {
 
 const placeholders = Array.from({ length: 8 }, (_, i) => i);
 
-const GameResults = ({ view, data, error, isPending, hasNextPage, isFetchingNextPage, fetchNextPage }: Props) => {
+const GameResults = ({
+  view,
+  data,
+  error,
+  isPending,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
+}: Props) => {
   const sentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,19 +36,27 @@ const GameResults = ({ view, data, error, isPending, hasNextPage, isFetchingNext
       ([entry]) => {
         if (entry.isIntersecting && !isFetchingNextPage) fetchNextPage();
       },
-      { rootMargin: "800px" }
+      { rootMargin: "800px" },
     );
     observer.observe(element);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (error) {
-    return <p className="border-t-[1.5px] border-ink py-6 font-body text-faded">{error.message}. Try again in a moment.</p>;
+    return (
+      <p className="border-t-[1.5px] border-ink py-6 font-body text-faded">
+        {error.message}. Try again in a moment.
+      </p>
+    );
   }
 
   const games = data?.pages.flatMap((page) => page.results) ?? [];
   if (!isPending && games.length === 0) {
-    return <p className="border-t-[1.5px] border-ink py-6 font-body text-faded">No games match these filters. Try removing one.</p>;
+    return (
+      <p className="border-t-[1.5px] border-ink py-6 font-body text-faded">
+        No games match these filters. Try removing one.
+      </p>
+    );
   }
 
   const loading = isPending || isFetchingNextPage;

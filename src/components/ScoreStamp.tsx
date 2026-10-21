@@ -10,7 +10,7 @@ const ScoreStamp = ({ value, className }: Props) => {
     <div
       className={cn(
         "wide relative grid aspect-square w-20 shrink-0 place-items-center border-4 text-[34px] leading-none font-black tabular-nums sm:w-24 sm:text-[42px]",
-        className
+        className,
       )}
     >
       {value}

@@ -12,9 +12,15 @@ const GenreTabs = () => {
         All
       </Tab>
       {isPending &&
-        Array.from({ length: 8 }, (_, i) => <span key={i} className="h-7 w-20 shrink-0 animate-pulse bg-tint" />)}
+        Array.from({ length: 8 }, (_, i) => (
+          <span key={i} className="h-7 w-20 shrink-0 animate-pulse bg-tint" />
+        ))}
       {data?.map((genre) => (
-        <Tab key={genre.slug} active={genre.slug === query.genre} onClick={() => setQuery({ genre: genre.slug })}>
+        <Tab
+          key={genre.slug}
+          active={genre.slug === query.genre}
+          onClick={() => setQuery({ genre: genre.slug })}
+        >
           {genre.name}
         </Tab>
       ))}

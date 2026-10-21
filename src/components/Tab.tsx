@@ -13,7 +13,7 @@ const Tab = ({ active, className, ...props }: Props) => {
       className={cn(
         "label inline-flex shrink-0 items-center gap-1.5 border-[1.5px] border-ink px-2.5 py-1.5 whitespace-nowrap",
         active ? "bg-ink text-paper" : "hover:bg-tint",
-        className
+        className,
       )}
       {...props}
     />

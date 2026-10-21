@@ -17,7 +17,7 @@ const StatusStamp = ({ status, small }: Props) => {
         small
           ? "mr-1.5 px-1 py-px align-[1px] text-[9.5px]"
           : "absolute top-2.5 left-2.5 -rotate-4 border-2 px-1.5 py-1 text-[10px] tracking-[0.08em] shadow-[2px_2px_0_rgb(0_0_0/.35)]",
-        className
+        className,
       )}
     >
       <Icon className={small ? "size-2.5" : "size-3"} strokeWidth={3} />

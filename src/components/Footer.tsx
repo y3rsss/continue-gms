@@ -4,7 +4,12 @@ const Footer = () => {
       <span className="wide font-sans text-sm font-black tracking-[-0.03em] text-ink">
         Continue<span className="text-house">?</span>
       </span>
-      <a href="https://rawg.io" target="_blank" rel="noreferrer" className="underline-offset-4 hover:text-ink hover:underline">
+      <a
+        href="https://rawg.io"
+        target="_blank"
+        rel="noreferrer"
+        className="underline-offset-4 hover:text-ink hover:underline"
+      >
         Game data from RAWG
       </a>
     </footer>

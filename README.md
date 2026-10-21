@@ -18,13 +18,13 @@ The video game index. Browse over 900,000 games, compare them by score, and keep
 
 ## Tech stack
 
-| Area | Tools |
-| --- | --- |
-| App | React 19, TypeScript, Vite 8 |
-| Styling | Tailwind CSS 4, shadcn/ui on Radix |
-| Data and routing | TanStack Query, React Router 8 |
-| API | Vercel Functions in front of the [RAWG API](https://rawg.io/apidocs) |
-| Tooling | ESLint 10, typescript-eslint |
+| Area             | Tools                                                                |
+| ---------------- | -------------------------------------------------------------------- |
+| App              | React 19, TypeScript, Vite 8                                         |
+| Styling          | Tailwind CSS 4, shadcn/ui on Radix                                   |
+| Data and routing | TanStack Query, React Router 8                                       |
+| API              | Vercel Functions in front of the [RAWG API](https://rawg.io/apidocs) |
+| Tooling          | ESLint 10, typescript-eslint                                         |
 
 The browser never talks to RAWG directly. The app calls its own `/api` routes, which add the API key on the server, validate input, reshape the responses into the app's own types and cache them on Vercel's CDN.
 
@@ -40,12 +40,12 @@ npm run dev
 
 The dev server runs the `/api` routes too, so local behaves like production.
 
-| Script | What it does |
-| --- | --- |
-| `npm run dev` | Start the dev server |
-| `npm run build` | Typecheck and build for production |
+| Script            | What it does                       |
+| ----------------- | ---------------------------------- |
+| `npm run dev`     | Start the dev server               |
+| `npm run build`   | Typecheck and build for production |
 | `npm run preview` | Serve the production build locally |
-| `npm run lint` | Lint the project |
+| `npm run lint`    | Lint the project                   |
 
 ## Project structure
 

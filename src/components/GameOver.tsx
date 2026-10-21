@@ -11,7 +11,10 @@ const GameOver = ({ message }: Props) => {
         Game over
       </h1>
       <p className="font-body text-lg text-faded">{message}</p>
-      <Link to="/" className="label border-2 border-house bg-house px-3 py-2.5 font-bold text-white hover:-rotate-2">
+      <Link
+        to="/"
+        className="label border-2 border-house bg-house px-3 py-2.5 font-bold text-white hover:-rotate-2"
+      >
         Continue? Yes → back to the cover
       </Link>
     </div>

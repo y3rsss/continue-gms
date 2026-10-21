@@ -15,7 +15,7 @@ const Score = ({ value, large }: Props) => {
       className={cn(
         "wide shrink-0 font-black tabular-nums",
         value >= 90 ? "border-house bg-house text-white" : "border-ink",
-        large ? "border-[2.5px] py-1 text-center text-xl" : "border-2 px-1.5 text-[15px]"
+        large ? "border-[2.5px] py-1 text-center text-xl" : "border-2 px-1.5 text-[15px]",
       )}
     >
       {value}

@@ -12,7 +12,13 @@ const ErrorPage = () => {
       <title>Game over | Continue?</title>
       <NavBar />
       <main>
-        <GameOver message={notFound ? "This page doesn't exist." : "Something broke on our side. Reload the page to try again."} />
+        <GameOver
+          message={
+            notFound
+              ? "This page doesn't exist."
+              : "Something broke on our side. Reload the page to try again."
+          }
+        />
       </main>
       <Footer />
     </div>

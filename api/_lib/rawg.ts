@@ -10,7 +10,7 @@ export class UpstreamError extends Error {
 
 export async function rawgFetch<T>(
   path: string,
-  params: Record<string, string | number | undefined> = {}
+  params: Record<string, string | number | undefined> = {},
 ): Promise<T> {
   const key = process.env.RAWG_API_KEY;
   if (!key) throw new Error("RAWG_API_KEY is not set");
@@ -144,7 +144,7 @@ export const toGame = (g: RawgGame): Game => ({
 export const toGameDetails = (
   g: RawgGameDetails,
   screenshots: RawgScreenshot[],
-  similar: RawgGame[]
+  similar: RawgGame[],
 ): GameDetails => ({
   ...toGame(g),
   hero: rawgImage(g.background_image, "hero"),
@@ -155,5 +155,8 @@ export const toGameDetails = (
   screenshots: screenshots
     .map((shot) => rawgImage(shot.image, "shot"))
     .filter((url): url is string => url !== null),
-  similar: similar.filter((game) => game.id !== g.id).slice(0, 4).map(toGame),
+  similar: similar
+    .filter((game) => game.id !== g.id)
+    .slice(0, 4)
+    .map(toGame),
 });

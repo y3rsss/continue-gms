@@ -56,7 +56,10 @@ const HomePage = () => {
 
         <div className="border-t-[6px] border-ink pt-3">
           {featured ? (
-            <Link to={`/games/${featured.slug}`} className="group relative block overflow-hidden border-[1.5px] border-ink">
+            <Link
+              to={`/games/${featured.slug}`}
+              className="group relative block overflow-hidden border-[1.5px] border-ink"
+            >
               <img
                 src={story?.hero ?? featured.image ?? undefined}
                 alt=""

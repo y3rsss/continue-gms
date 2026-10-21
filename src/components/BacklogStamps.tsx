@@ -21,7 +21,9 @@ const BacklogStamps = ({ game }: { game: Game }) => {
               onClick={() => setStatus(game, on ? null : status)}
               className={cn(
                 "label inline-flex items-center gap-1.5 border-2 px-2.5 py-2 font-bold tracking-[0.06em]",
-                on ? cn("-rotate-3 animate-[stamp_.28s_cubic-bezier(.2,1.6,.4,1)]", className) : "border-ink hover:bg-tint"
+                on
+                  ? cn("-rotate-3 animate-[stamp_.28s_cubic-bezier(.2,1.6,.4,1)]", className)
+                  : "border-ink hover:bg-tint",
               )}
             >
               <Icon className="size-3.5" strokeWidth={2.5} />

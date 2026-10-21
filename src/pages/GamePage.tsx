@@ -49,7 +49,10 @@ const GamePage = () => {
   ].filter(([, value]) => value);
 
   return (
-    <article style={{ "--spot": spot ?? "var(--house)" } as CSSProperties} className="spot-scope [transition:--spot_.5s_ease]">
+    <article
+      style={{ "--spot": spot ?? "var(--house)" } as CSSProperties}
+      className="spot-scope [transition:--spot_.5s_ease]"
+    >
       <title>{`${game.name} | Continue?`}</title>
       <section className="grid gap-8 border-b-[3px] border-ink bg-[radial-gradient(80%_120%_at_0%_0%,color-mix(in_oklab,var(--spot)_22%,transparent),transparent_65%)] px-4 py-7 sm:px-7 lg:grid-cols-[1.25fr_1fr]">
         <Cover
@@ -84,15 +87,24 @@ const GamePage = () => {
           <dl className="grid grid-cols-[max-content_minmax(0,1fr)] font-mono text-xs">
             {specs.map(([label, value]) => (
               <div key={label} className="contents">
-                <dt className="label border-t-[1.5px] border-ink py-1.5 pr-5 text-[10.5px] text-faded">{label}</dt>
+                <dt className="label border-t-[1.5px] border-ink py-1.5 pr-5 text-[10.5px] text-faded">
+                  {label}
+                </dt>
                 <dd className="border-t-[1.5px] border-ink py-1.5">{value}</dd>
               </div>
             ))}
             {game.website && (
               <div className="contents">
-                <dt className="label border-t-[1.5px] border-ink py-1.5 pr-5 text-[10.5px] text-faded">Website</dt>
+                <dt className="label border-t-[1.5px] border-ink py-1.5 pr-5 text-[10.5px] text-faded">
+                  Website
+                </dt>
                 <dd className="truncate border-t-[1.5px] border-ink py-1.5">
-                  <a href={game.website} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-spot-text">
+                  <a
+                    href={game.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline underline-offset-4 hover:text-spot-text"
+                  >
                     {new URL(game.website).hostname.replace(/^www\./, "")}
                   </a>
                 </dd>
@@ -106,13 +118,18 @@ const GamePage = () => {
         <div className="grid min-w-0 content-start gap-5">
           {paragraphs.length > 0 && (
             <div className="grid justify-items-start gap-2">
-              <div className={cn("grid max-w-[62ch] gap-3 font-body text-base leading-relaxed", !expanded && "line-clamp-[8]")}>
+              <div
+                className={cn(
+                  "grid max-w-[62ch] gap-3 font-body text-base leading-relaxed",
+                  !expanded && "line-clamp-[8]",
+                )}
+              >
                 {paragraphs.map((p, i) => (
                   <p
                     key={i}
                     className={cn(
                       i === 0 &&
-                        "first-letter:wide first-letter:float-left first-letter:mt-1 first-letter:mr-2 first-letter:font-sans first-letter:text-[3.1em] first-letter:leading-[0.82] first-letter:font-black first-letter:text-spot-text"
+                        "first-letter:wide first-letter:float-left first-letter:mt-1 first-letter:mr-2 first-letter:font-sans first-letter:text-[3.1em] first-letter:leading-[0.82] first-letter:font-black first-letter:text-spot-text",
                     )}
                   >
                     {p}
@@ -120,7 +137,11 @@ const GamePage = () => {
                 ))}
               </div>
               {paragraphs.join(" ").length > 600 && (
-                <button type="button" onClick={() => setExpanded(!expanded)} className="label text-spot-text hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setExpanded(!expanded)}
+                  className="label text-spot-text hover:underline"
+                >
                   {expanded ? "Show less" : "Read more"}
                 </button>
               )}
@@ -130,7 +151,11 @@ const GamePage = () => {
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
               {game.screenshots.slice(0, 6).map((shot) => (
                 <a key={shot} href={shot} target="_blank" rel="noreferrer">
-                  <Cover src={shot} alt={`${game.name} screenshot`} className="aspect-video hover:border-spot" />
+                  <Cover
+                    src={shot}
+                    alt={`${game.name} screenshot`}
+                    className="aspect-video hover:border-spot"
+                  />
                 </a>
               ))}
             </div>
@@ -140,7 +165,9 @@ const GamePage = () => {
         {game.similar.length > 0 && (
           <aside className="grid content-start gap-3">
             <div className="flex items-baseline justify-between border-t-[3px] border-spot pt-2">
-              <h2 className="wide text-lg font-black tracking-[-0.02em] uppercase">If you like {game.name}</h2>
+              <h2 className="wide text-lg font-black tracking-[-0.02em] uppercase">
+                If you like {game.name}
+              </h2>
             </div>
             <div className="grid">
               {game.similar.map((other) => (
@@ -154,7 +181,10 @@ const GamePage = () => {
                     <b className="narrow block text-[17px] leading-[1.05] font-extrabold uppercase group-hover:text-spot-text">
                       {other.name}
                     </b>
-                    <Meta items={[other.released?.slice(0, 4), other.genres[0]?.name]} className="mt-1 text-[10px]" />
+                    <Meta
+                      items={[other.released?.slice(0, 4), other.genres[0]?.name]}
+                      className="mt-1 text-[10px]"
+                    />
                   </span>
                   <Score value={other.metascore} />
                 </Link>
