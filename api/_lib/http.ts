@@ -1,4 +1,11 @@
-import { UpstreamError } from "./rawg.js";
+export class UpstreamError extends Error {
+  constructor(
+    public provider: string,
+    public status: number,
+  ) {
+    super(`${provider} responded with ${status}`);
+  }
+}
 
 export const SLUG = /^[a-z0-9-]{1,120}$/;
 

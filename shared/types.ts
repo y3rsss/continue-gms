@@ -33,9 +33,17 @@ export interface GameDetails extends Game {
   similar: Game[];
 }
 
-export interface StoreLink {
-  name: string;
+export interface StoreOffer {
+  store: string;
   url: string;
+  /** USD, null when the store has no price data (consoles, mobile) */
+  price: number | null;
+  regularPrice: number | null;
+}
+
+export interface WhereToBuy {
+  offers: StoreOffer[];
+  lowestEver: { price: number; date: string } | null;
 }
 
 export interface GamesPage {

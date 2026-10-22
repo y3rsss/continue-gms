@@ -1,12 +1,7 @@
-import type { Game, GameDetails, Genre, List, Platform, SortOption, StoreLink } from "../../shared/types.js";
+import type { Game, GameDetails, Genre, List, Platform, SortOption, StoreOffer } from "../../shared/types.js";
+import { UpstreamError } from "./http.js";
 
 const BASE_URL = "https://api.rawg.io/api/";
-
-export class UpstreamError extends Error {
-  constructor(public status: number) {
-    super(`RAWG responded with ${status}`);
-  }
-}
 
 export async function rawgFetch<T>(
   path: string,
@@ -22,7 +17,7 @@ export async function rawgFetch<T>(
   url.searchParams.set("key", key);
 
   const response = await fetch(url);
-  if (!response.ok) throw new UpstreamError(response.status);
+  if (!response.ok) throw new UpstreamError("RAWG", response.status);
   return response.json() as Promise<T>;
 }
 
@@ -139,9 +134,11 @@ const STORE_NAMES: Record<number, string> = {
   11: "Epic Games Store",
 };
 
-export const toStoreLink = (link: RawgStoreLink): StoreLink => ({
-  name: STORE_NAMES[link.store_id] ?? "Other store",
+export const toStoreOffer = (link: RawgStoreLink): StoreOffer => ({
+  store: STORE_NAMES[link.store_id] ?? "Other store",
   url: link.url.replace(/^http:/, "https:"),
+  price: null,
+  regularPrice: null,
 });
 
 export const toPlatform = (p: RawgPlatform): Platform => ({ slug: p.slug, name: p.name });

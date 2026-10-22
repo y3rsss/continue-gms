@@ -17,7 +17,7 @@ import useStores from "../hooks/useStores";
 const GamePage = () => {
   const { slug } = useParams();
   const { data: game, error, isPending } = useGame(slug);
-  const stores = useStores(slug).data;
+  const stores = useStores(slug);
   const spot = useSpot(game?.image).data;
   const [expanded, setExpanded] = useState(false);
 
@@ -114,7 +114,7 @@ const GamePage = () => {
               </div>
             )}
           </dl>
-          <StoreLinks stores={stores} />
+          <StoreLinks data={stores.data} loading={stores.isPending} />
         </div>
       </section>
 
