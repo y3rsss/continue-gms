@@ -3,5 +3,6 @@
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
-  "prettier.requireConfig": true
+  "prettier.requireConfig": true,
+  "files.eol": "\n"
 }
