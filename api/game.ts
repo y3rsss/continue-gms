@@ -1,6 +1,5 @@
-import { cacheFor, errorResponse } from "./_lib/http.js";
+import { SLUG, cacheFor, errorResponse } from "./_lib/http.js";
 import {
-  UpstreamError,
   rawgFetch,
   toGameDetails,
   type RawgGame,
@@ -9,7 +8,6 @@ import {
   type RawgScreenshot,
 } from "./_lib/rawg.js";
 
-const SLUG = /^[a-z0-9-]{1,120}$/;
 const BROAD_GENRES = new Set(["action", "adventure", "indie", "casual"]);
 
 export async function GET(request: Request): Promise<Response> {
@@ -38,9 +36,6 @@ export async function GET(request: Request): Promise<Response> {
       headers: cacheFor(24 * 60 * 60),
     });
   } catch (error) {
-    if (error instanceof UpstreamError && error.status === 404) {
-      return Response.json({ error: "Game not found" }, { status: 404 });
-    }
     return errorResponse(error);
   }
 }

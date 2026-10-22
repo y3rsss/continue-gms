@@ -33,6 +33,11 @@ export interface GameDetails extends Game {
   similar: Game[];
 }
 
+export interface StoreLink {
+  name: string;
+  url: string;
+}
+
 export interface GamesPage {
   results: Game[];
   count: number;

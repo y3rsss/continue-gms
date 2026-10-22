@@ -6,12 +6,14 @@ import * as games from "./api/games.ts";
 import * as genres from "./api/genres.ts";
 import * as platforms from "./api/platforms.ts";
 import * as game from "./api/game.ts";
+import * as stores from "./api/stores.ts";
 
 const routes: Record<string, (request: Request) => Promise<Response>> = {
   "/api/games": games.GET,
   "/api/genres": genres.GET,
   "/api/platforms": platforms.GET,
   "/api/game": game.GET,
+  "/api/stores": stores.GET,
 };
 
 function apiRoutes(): Plugin {

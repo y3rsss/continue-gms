@@ -9,12 +9,15 @@ import GameOver from "../components/GameOver";
 import Meta from "../components/Meta";
 import Score from "../components/Score";
 import ScoreStamp from "../components/ScoreStamp";
+import StoreLinks from "../components/StoreLinks";
 import useGame from "../hooks/useGame";
 import useSpot from "../hooks/useSpot";
+import useStores from "../hooks/useStores";
 
 const GamePage = () => {
   const { slug } = useParams();
   const { data: game, error, isPending } = useGame(slug);
+  const stores = useStores(slug).data;
   const spot = useSpot(game?.image).data;
   const [expanded, setExpanded] = useState(false);
 
@@ -111,6 +114,7 @@ const GamePage = () => {
               </div>
             )}
           </dl>
+          <StoreLinks stores={stores} />
         </div>
       </section>
 

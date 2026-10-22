@@ -1,4 +1,4 @@
-import type { Game, GameDetails, Genre, List, Platform, SortOption } from "../../shared/types.js";
+import type { Game, GameDetails, Genre, List, Platform, SortOption, StoreLink } from "../../shared/types.js";
 
 const BASE_URL = "https://api.rawg.io/api/";
 
@@ -115,11 +115,34 @@ export interface RawgScreenshot {
   image: string;
 }
 
+export interface RawgStoreLink {
+  store_id: number;
+  url: string;
+}
+
 export interface RawgList<T> {
   count: number;
   next: string | null;
   results: T[];
 }
+
+const STORE_NAMES: Record<number, string> = {
+  1: "Steam",
+  2: "Xbox Store",
+  3: "PlayStation Store",
+  4: "App Store",
+  5: "GOG",
+  6: "Nintendo eShop",
+  7: "Xbox 360 Store",
+  8: "Google Play",
+  9: "itch.io",
+  11: "Epic Games Store",
+};
+
+export const toStoreLink = (link: RawgStoreLink): StoreLink => ({
+  name: STORE_NAMES[link.store_id] ?? "Other store",
+  url: link.url.replace(/^http:/, "https:"),
+});
 
 export const toPlatform = (p: RawgPlatform): Platform => ({ slug: p.slug, name: p.name });
 
