@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { SORT_OPTIONS, type SortOption } from "@shared/types";
 import { count } from "@/lib/format";
 import FilterMenu from "../components/FilterMenu";
@@ -60,7 +61,12 @@ const GamesPage = () => {
           value={query.sort}
           onChange={(value) => setQuery({ sort: value as SortOption | undefined })}
         />
-        {query.search && <Tab onClick={() => setQuery({ search: undefined })}>Clear search ×</Tab>}
+        {query.search && (
+          <Tab onClick={() => setQuery({ search: undefined })}>
+            Clear search
+            <X className="size-3" strokeWidth={2.5} />
+          </Tab>
+        )}
         <div className="ml-auto flex" role="group" aria-label="View">
           <Tab active={view === "list"} onClick={() => setView("list")}>
             List

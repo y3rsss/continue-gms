@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { Command } from "cmdk";
 import { Dialog } from "radix-ui";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, CornerDownLeft, Search } from "lucide-react";
 import { platformAbbr, year } from "@/lib/format";
 import { readRecent, type RecentGame } from "@/lib/recent";
 import useSearch from "../hooks/useSearch";
@@ -175,11 +175,19 @@ const SearchPalette = () => {
 
             <div className="label hidden items-center gap-4 border-t-[1.5px] border-ink px-4 py-2 text-[10px] text-faded sm:flex">
               <span className="flex items-center gap-1">
-                <Key>↑</Key>
-                <Key>↓</Key> move
+                <Key>
+                  <ArrowUp className="size-2.5" strokeWidth={2.5} />
+                </Key>
+                <Key>
+                  <ArrowDown className="size-2.5" strokeWidth={2.5} />
+                </Key>
+                move
               </span>
               <span className="flex items-center gap-1">
-                <Key>↵</Key> open
+                <Key>
+                  <CornerDownLeft className="size-2.5" strokeWidth={2.5} />
+                </Key>
+                open
               </span>
               <span className="flex items-center gap-1">
                 <Key>esc</Key> close

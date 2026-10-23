@@ -15,7 +15,7 @@ const GameOver = ({ message }: Props) => {
         to="/"
         className="label border-2 border-house bg-house px-3 py-2.5 font-bold text-white hover:-rotate-2"
       >
-        Continue? Yes → back to the cover
+        Continue? Yes, back to the cover
       </Link>
     </div>
   );

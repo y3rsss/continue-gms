@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { GamesPage } from "@shared/types";
 import { count, firstSentence } from "@/lib/format";
@@ -95,8 +96,12 @@ const HomePage = () => {
               to={teaser.to}
               className="group grid gap-1 px-4 pt-3 pb-3.5 max-md:not-first:border-t-[1.5px] md:not-first:border-l-[1.5px]"
             >
-              <b className="narrow text-[21px] leading-[1.05] font-extrabold uppercase group-hover:text-house">
-                {teaser.title} →
+              <b className="narrow flex items-center gap-1.5 text-[21px] leading-[1.05] font-extrabold uppercase group-hover:text-house">
+                {teaser.title}
+                <ArrowRight
+                  className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+                  strokeWidth={2.5}
+                />
               </b>
               <span className="font-body text-[13.5px] text-faded">{teaser.text}</span>
             </Link>

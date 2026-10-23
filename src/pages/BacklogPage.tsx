@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from "react-router";
+import { ArrowRight } from "lucide-react";
 import GameCard from "../components/GameCard";
 import { STATUS_STYLE } from "@/lib/status";
 import { cn } from "@/lib/utils";
@@ -51,9 +52,10 @@ const BacklogPage = () => {
           </p>
           <Link
             to="/games"
-            className="label border-2 border-ink px-3 py-2 font-bold hover:bg-ink hover:text-paper"
+            className="label inline-flex items-center gap-1.5 border-2 border-ink px-3 py-2 font-bold hover:bg-ink hover:text-paper"
           >
-            Browse the index →
+            Browse the index
+            <ArrowRight className="size-3.5" strokeWidth={2.5} />
           </Link>
         </div>
       ) : (

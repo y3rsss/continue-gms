@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { ArrowRight } from "lucide-react";
 import type { Game } from "@shared/types";
 import GameCard, { GameCardSkeleton } from "./GameCard";
 
@@ -16,8 +17,12 @@ const Rail = ({ title, games, more }: Props) => {
           {title}
         </h2>
         {more && (
-          <Link to={more} className="label whitespace-nowrap text-faded hover:text-house">
-            See all →
+          <Link
+            to={more}
+            className="label inline-flex items-center gap-1 whitespace-nowrap text-faded hover:text-house"
+          >
+            See all
+            <ArrowRight className="size-3.5" />
           </Link>
         )}
       </div>
