@@ -15,8 +15,7 @@ import useGame from "../hooks/useGame";
 import useSpot from "../hooks/useSpot";
 import useStores from "../hooks/useStores";
 
-const GamePage = () => {
-  const { slug } = useParams();
+const GameView = ({ slug }: { slug: string | undefined }) => {
   const { data: game, error, isPending } = useGame(slug);
   const stores = useStores(slug);
   const spot = useSpot(game?.image).data;
@@ -204,6 +203,12 @@ const GamePage = () => {
       </section>
     </article>
   );
+};
+
+// key per game, so expanded sections and other local state reset when moving between games
+const GamePage = () => {
+  const { slug } = useParams();
+  return <GameView key={slug} slug={slug} />;
 };
 
 export default GamePage;
