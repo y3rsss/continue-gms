@@ -1,5 +1,6 @@
 import { LISTS, SORT_OPTIONS, type GamesPage, type List, type SortOption } from "../shared/types.js";
 import { cacheFor, errorResponse } from "./_lib/http.js";
+import { searchGames } from "./_lib/search.js";
 import {
   LIST_PARAMS,
   PLATFORM_IDS,
@@ -38,14 +39,23 @@ export async function GET(request: Request): Promise<Response> {
     return Response.json({ error: "Invalid query" }, { status: 400 });
   }
 
+  const filters = { genres: genre, parent_platforms: platform ? PLATFORM_IDS[platform] : undefined };
+
   try {
+    if (search) {
+      const matches = await searchGames(search, sort, filters);
+      const start = (page - 1) * size;
+      const body: GamesPage = {
+        results: matches.slice(start, start + size),
+        count: matches.length,
+        nextPage: start + size < matches.length ? page + 1 : null,
+      };
+      return Response.json(body, { headers: cacheFor(60 * 60) });
+    }
+
     const data = await rawgFetch<RawgList<RawgGame>>("games", {
-      genres: genre,
-      parent_platforms: platform && PLATFORM_IDS[platform],
-      // RAWG's own relevance puts junk first for searches; popularity is far closer to what people mean
-      ordering: SORT_ORDERING[sort] ?? (search ? "-added" : undefined),
-      search,
-      search_precise: search && "true",
+      ...filters,
+      ordering: SORT_ORDERING[sort],
       page,
       page_size: size,
       ...(list && LIST_PARAMS[list as List]()),
