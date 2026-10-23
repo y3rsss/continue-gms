@@ -95,6 +95,7 @@ export interface RawgGame {
   genres?: RawgGenre[] | null;
   metacritic: number | null;
   rating: number;
+  added?: number;
 }
 
 export interface RawgGameDetails extends RawgGame {

@@ -1,6 +1,7 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useParams } from "react-router";
 import { fullDate } from "@/lib/format";
+import { rememberGame } from "@/lib/recent";
 import { cn } from "@/lib/utils";
 import { ApiError } from "../services/api";
 import BacklogStamps from "../components/BacklogStamps";
@@ -20,6 +21,10 @@ const GamePage = () => {
   const stores = useStores(slug);
   const spot = useSpot(game?.image).data;
   const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (game) rememberGame(game);
+  }, [game]);
 
   if (error) {
     return error instanceof ApiError && error.status === 404 ? (
