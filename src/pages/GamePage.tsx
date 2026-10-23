@@ -1,12 +1,15 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useParams } from "react-router";
+import { Maximize2 } from "lucide-react";
 import { fullDate } from "@/lib/format";
 import { rememberGame } from "@/lib/recent";
 import { cn } from "@/lib/utils";
 import { ApiError } from "../services/api";
 import BacklogStamps from "../components/BacklogStamps";
 import Cover from "../components/Cover";
+import Gallery from "../components/Gallery";
 import GameOver from "../components/GameOver";
+import MediaGrid from "../components/MediaGrid";
 import Meta from "../components/Meta";
 import Score from "../components/Score";
 import ScoreStamp from "../components/ScoreStamp";
@@ -20,6 +23,7 @@ const GameView = ({ slug }: { slug: string | undefined }) => {
   const stores = useStores(slug);
   const spot = useSpot(game?.image).data;
   const [expanded, setExpanded] = useState(false);
+  const [viewing, setViewing] = useState<number | null>(null);
 
   useEffect(() => {
     if (game) rememberGame(game);
@@ -54,6 +58,7 @@ const GameView = ({ slug }: { slug: string | undefined }) => {
     ["Released", fullDate(game.released)],
     ["Platforms", game.platforms.map((p) => p.name).join(", ")],
   ].filter(([, value]) => value);
+  const heroIndex = game.media.findIndex((item) => item.kind === "image");
 
   return (
     <article
@@ -62,12 +67,26 @@ const GameView = ({ slug }: { slug: string | undefined }) => {
     >
       <title>{`${game.name} | Continue?`}</title>
       <section className="grid gap-8 border-b-[3px] border-ink bg-[radial-gradient(80%_120%_at_0%_0%,color-mix(in_oklab,var(--spot)_22%,transparent),transparent_65%)] px-4 py-7 sm:px-7 lg:grid-cols-[1.25fr_1fr]">
-        <Cover
-          src={game.hero}
-          alt={game.name}
-          eager
-          className="border-2 shadow-[10px_10px_0_color-mix(in_oklab,var(--spot)_70%,transparent)]"
-        />
+        <button
+          type="button"
+          aria-label={`Open ${game.name} screenshots`}
+          disabled={heroIndex < 0}
+          onClick={() => setViewing(heroIndex)}
+          className="group relative self-start text-left disabled:cursor-default"
+        >
+          <Cover
+            src={game.hero}
+            alt={game.name}
+            eager
+            className="border-2 shadow-[10px_10px_0_color-mix(in_oklab,var(--spot)_70%,transparent)]"
+          />
+          {heroIndex >= 0 && (
+            <span className="label absolute right-3 bottom-3 flex items-center gap-1.5 border-2 border-[#15171c] bg-white px-2 py-1.5 font-bold text-[#15171c] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+              <Maximize2 className="size-3.5" strokeWidth={2.5} />
+              {game.media.length > 1 ? `View all ${game.media.length}` : "View"}
+            </span>
+          )}
+        </button>
         <div className="grid min-w-0 content-start gap-4">
           {game.genres.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
@@ -155,19 +174,7 @@ const GameView = ({ slug }: { slug: string | undefined }) => {
               )}
             </div>
           )}
-          {game.screenshots.length > 0 && (
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-              {game.screenshots.slice(0, 6).map((shot) => (
-                <a key={shot} href={shot} target="_blank" rel="noreferrer">
-                  <Cover
-                    src={shot}
-                    alt={`${game.name} screenshot`}
-                    className="aspect-video hover:border-spot"
-                  />
-                </a>
-              ))}
-            </div>
-          )}
+          <MediaGrid media={game.media} title={game.name} onOpen={setViewing} />
         </div>
 
         {game.similar.length > 0 && (
@@ -201,6 +208,13 @@ const GameView = ({ slug }: { slug: string | undefined }) => {
           </aside>
         )}
       </section>
+      <Gallery
+        media={game.media}
+        index={viewing}
+        onIndexChange={setViewing}
+        title={game.name}
+        spot={spot ?? undefined}
+      />
     </article>
   );
 };

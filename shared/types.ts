@@ -23,13 +23,17 @@ export interface Game {
   rating: number;
 }
 
+export type Media =
+  | { kind: "image"; full: string; preview: string; thumb: string }
+  | { kind: "video"; src: string; poster: string | null; title: string };
+
 export interface GameDetails extends Game {
   hero: string | null;
   description: string;
   developers: string[];
   publishers: string[];
   website: string | null;
-  screenshots: string[];
+  media: Media[];
   similar: Game[];
 }
 

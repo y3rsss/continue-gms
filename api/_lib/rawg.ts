@@ -1,4 +1,13 @@
-import type { Game, GameDetails, Genre, List, Platform, SortOption, StoreOffer } from "../../shared/types.js";
+import type {
+  Game,
+  GameDetails,
+  Genre,
+  List,
+  Media,
+  Platform,
+  SortOption,
+  StoreOffer,
+} from "../../shared/types.js";
 import { UpstreamError } from "./http.js";
 
 const BASE_URL = "https://api.rawg.io/api/";
@@ -61,6 +70,7 @@ const IMAGE_SIZES = {
   card: "crop/600/400",
   shot: "resize/640/-",
   hero: "resize/1280/-",
+  full: "resize/1920/-",
 } as const;
 
 export function rawgImage(url: string | null | undefined, size: keyof typeof IMAGE_SIZES) {
@@ -104,6 +114,13 @@ export interface RawgGameDetails extends RawgGame {
   developers?: { name: string }[] | null;
   publishers?: { name: string }[] | null;
   website: string | null;
+}
+
+export interface RawgMovie {
+  id: number;
+  name: string;
+  preview: string | null;
+  data: { "480": string; max: string };
 }
 
 export interface RawgScreenshot {
@@ -162,9 +179,27 @@ export const toGame = (g: RawgGame): Game => ({
   rating: g.rating,
 });
 
+function toMedia(g: RawgGameDetails, screenshots: RawgScreenshot[], movies: RawgMovie[]): Media[] {
+  const videos: Media[] = movies.map((movie) => ({
+    kind: "video",
+    src: movie.data.max,
+    poster: movie.preview,
+    title: movie.name,
+  }));
+  const originals = [g.background_image, g.background_image_additional, ...screenshots.map((s) => s.image)];
+  const images: Media[] = [...new Set(originals.filter((url): url is string => !!url))].map((url) => ({
+    kind: "image",
+    full: rawgImage(url, "full")!,
+    preview: rawgImage(url, "shot")!,
+    thumb: rawgImage(url, "thumb")!,
+  }));
+  return [...videos.slice(0, 1), ...images, ...videos.slice(1)];
+}
+
 export const toGameDetails = (
   g: RawgGameDetails,
   screenshots: RawgScreenshot[],
+  movies: RawgMovie[],
   similar: RawgGame[],
 ): GameDetails => ({
   ...toGame(g),
@@ -173,9 +208,7 @@ export const toGameDetails = (
   developers: (g.developers ?? []).map((d) => d.name),
   publishers: (g.publishers ?? []).map((p) => p.name),
   website: g.website || null,
-  screenshots: screenshots
-    .map((shot) => rawgImage(shot.image, "shot"))
-    .filter((url): url is string => url !== null),
+  media: toMedia(g, screenshots, movies),
   similar: similar
     .filter((game) => game.id !== g.id)
     .slice(0, 4)

@@ -5,6 +5,7 @@ import {
   type RawgGame,
   type RawgGameDetails,
   type RawgList,
+  type RawgMovie,
   type RawgScreenshot,
 } from "./_lib/rawg.js";
 
@@ -17,9 +18,10 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   try {
-    const [game, screenshots] = await Promise.all([
+    const [game, screenshots, movies] = await Promise.all([
       rawgFetch<RawgGameDetails>(`games/${slug}`),
-      rawgFetch<RawgList<RawgScreenshot>>(`games/${slug}/screenshots`, { page_size: 6 }),
+      rawgFetch<RawgList<RawgScreenshot>>(`games/${slug}/screenshots`, { page_size: 40 }),
+      rawgFetch<RawgList<RawgMovie>>(`games/${slug}/movies`).catch(() => ({ results: [] })),
     ]);
 
     const genres = game.genres ?? [];
@@ -32,7 +34,7 @@ export async function GET(request: Request): Promise<Response> {
         })
       : { results: [] };
 
-    return Response.json(toGameDetails(game, screenshots.results, similar.results), {
+    return Response.json(toGameDetails(game, screenshots.results, movies.results, similar.results), {
       headers: cacheFor(24 * 60 * 60),
     });
   } catch (error) {
