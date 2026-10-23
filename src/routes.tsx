@@ -1,10 +1,11 @@
 import { createBrowserRouter } from "react-router";
 import Layout from "./pages/Layout";
 import HomePage from "./pages/HomePage";
-import GamesPage from "./pages/GamesPage";
-import GamePage from "./pages/GamePage";
-import BacklogPage from "./pages/BacklogPage";
 import ErrorPage from "./pages/ErrorPage";
+
+const page = (load: () => Promise<{ default: React.ComponentType }>) => async () => ({
+  Component: (await load()).default,
+});
 
 const router = createBrowserRouter([
   {
@@ -13,9 +14,9 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "games", element: <GamesPage /> },
-      { path: "games/:slug", element: <GamePage /> },
-      { path: "backlog", element: <BacklogPage /> },
+      { path: "games", lazy: page(() => import("./pages/GamesPage")) },
+      { path: "games/:slug", lazy: page(() => import("./pages/GamePage")) },
+      { path: "backlog", lazy: page(() => import("./pages/BacklogPage")) },
     ],
   },
 ]);
