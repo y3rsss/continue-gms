@@ -42,7 +42,8 @@ export async function GET(request: Request): Promise<Response> {
     const data = await rawgFetch<RawgList<RawgGame>>("games", {
       genres: genre,
       parent_platforms: platform && PLATFORM_IDS[platform],
-      ordering: SORT_ORDERING[sort],
+      // RAWG's own relevance puts junk first for searches; popularity is far closer to what people mean
+      ordering: SORT_ORDERING[sort] ?? (search ? "-added" : undefined),
       search,
       search_precise: search && "true",
       page,
