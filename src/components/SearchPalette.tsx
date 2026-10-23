@@ -13,8 +13,19 @@ const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigat
 const ITEM =
   "group flex cursor-pointer items-center gap-3 px-2 py-2 data-[selected=true]:bg-ink data-[selected=true]:text-paper";
 
-const GameItem = ({ game, onSelect }: { game: RecentGame; onSelect: () => void }) => (
-  <Command.Item value={game.slug} onSelect={onSelect} className={ITEM}>
+interface GameItemProps {
+  game: RecentGame;
+  onSelect: () => void;
+  disabled?: boolean;
+}
+
+const GameItem = ({ game, onSelect, disabled }: GameItemProps) => (
+  <Command.Item
+    value={game.slug}
+    onSelect={onSelect}
+    disabled={disabled}
+    className={`${ITEM} data-[disabled=true]:cursor-default data-[disabled=true]:opacity-40`}
+  >
     <span className="aspect-[3/2] w-16 shrink-0 overflow-hidden border-[1.5px] border-ink bg-tint">
       {game.image && <img src={game.image} alt="" loading="lazy" className="size-full object-cover" />}
     </span>
@@ -46,8 +57,9 @@ const Key = ({ children }: { children: ReactNode }) => (
 const SearchPalette = () => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [picked, setPicked] = useState({ term: "", value: "" });
   const navigate = useNavigate();
-  const { data, isFetching, isPending, ready, term } = useSearch(query);
+  const { data, isFetching, isPending, isPlaceholderData, ready, term } = useSearch(query);
   const recent = useMemo(() => (open ? readRecent() : []), [open]);
 
   useEffect(() => {
@@ -72,8 +84,22 @@ const SearchPalette = () => {
     navigate(path);
   };
 
-  const results = ready ? (data?.results ?? []) : [];
   const typed = query.trim();
+  const searching = ready && typed.length >= 2;
+  const results = searching ? (data?.results ?? []) : [];
+  // results for an older search stay visible while the new one loads, but Enter must not open them
+  const stale = typed !== term || isPlaceholderData;
+
+  const SEE_ALL = "__all";
+  const options = !searching
+    ? recent.map((game) => game.slug)
+    : results.length === 0
+      ? []
+      : stale
+        ? [SEE_ALL]
+        : [...results.map((game) => game.slug), SEE_ALL];
+  // the highlighted row belongs to one search term; a new term starts again at the top result
+  const active = picked.term === term && options.includes(picked.value) ? picked.value : (options[0] ?? "");
 
   return (
     <Dialog.Root open={open} onOpenChange={show}>
@@ -91,7 +117,12 @@ const SearchPalette = () => {
           className="fixed top-[8vh] left-1/2 z-50 w-[min(640px,calc(100vw-2rem))] -translate-x-1/2 border-[3px] border-ink bg-paper text-ink shadow-[8px_8px_0_var(--ink)] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
         >
           <Dialog.Title className="sr-only">Search games</Dialog.Title>
-          <Command shouldFilter={false} label="Search games">
+          <Command
+            shouldFilter={false}
+            label="Search games"
+            value={active}
+            onValueChange={(value) => setPicked({ term, value })}
+          >
             <div className="flex items-center gap-3 border-b-[3px] border-ink px-4">
               <Search className="size-5 shrink-0 text-faded" />
               <Command.Input
@@ -100,11 +131,11 @@ const SearchPalette = () => {
                 placeholder="Search games"
                 className="narrow h-14 w-full bg-transparent text-2xl font-extrabold uppercase outline-none placeholder:text-faded/60"
               />
-              {ready && isFetching && <span className="size-2 shrink-0 animate-pulse bg-house" />}
+              {searching && isFetching && <span className="size-2 shrink-0 animate-pulse bg-house" />}
             </div>
 
             <Command.List className="max-h-[min(60vh,520px)] overflow-y-auto p-2">
-              {!ready && recent.length > 0 && (
+              {!searching && recent.length > 0 && (
                 <Command.Group
                   heading="Recently viewed"
                   className="[&_[cmdk-group-heading]]:label [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-faded"
@@ -114,20 +145,25 @@ const SearchPalette = () => {
                   ))}
                 </Command.Group>
               )}
-              {!ready && recent.length === 0 && (
+              {!searching && recent.length === 0 && (
                 <Note>{typed ? "Keep typing…" : "Find any game by name. Try “elden” or “zelda”."}</Note>
               )}
 
-              {ready && isPending && <Note>Searching…</Note>}
-              {ready && !isPending && results.length === 0 && !isFetching && (
+              {searching && isPending && <Note>Searching…</Note>}
+              {searching && !isPending && results.length === 0 && !isFetching && (
                 <Note>No games found for “{term}”.</Note>
               )}
               {results.map((game) => (
-                <GameItem key={game.slug} game={game} onSelect={() => go(`/games/${game.slug}`)} />
+                <GameItem
+                  key={game.slug}
+                  game={game}
+                  disabled={stale}
+                  onSelect={() => go(`/games/${game.slug}`)}
+                />
               ))}
-              {ready && results.length > 0 && (
+              {results.length > 0 && (
                 <Command.Item
-                  value="__all"
+                  value={SEE_ALL}
                   onSelect={() => go(`/games?search=${encodeURIComponent(typed)}`)}
                   className={`${ITEM} label mt-1 justify-between border-t-[1.5px] border-ink pt-3`}
                 >
