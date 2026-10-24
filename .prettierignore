@@ -1,3 +1,6 @@
 dist
 package-lock.json
 docs
+test-results
+playwright-report
+e2e/fixtures

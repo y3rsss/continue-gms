@@ -69,6 +69,7 @@ function apiRoutes(): Plugin {
         configFile: false,
         appType: "custom",
         server: { middlewareMode: true, hmr: false },
+        optimizeDeps: { entries: [] },
       });
       server.httpServer.once("close", () => void loader.close());
       server.middlewares.use(handler((file) => loader.ssrLoadModule(file)));
