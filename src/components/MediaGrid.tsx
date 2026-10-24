@@ -7,30 +7,32 @@ const VISIBLE = 6;
 interface Props {
   media: Media[];
   title: string;
+  skip: number;
   onOpen: (index: number) => void;
 }
 
-const MediaGrid = ({ media, title, onOpen }: Props) => {
-  if (media.length === 0) return null;
-  const unseen = media.length - (VISIBLE - 1);
+const MediaGrid = ({ media, title, skip, onOpen }: Props) => {
+  const tiles = media.map((item, index) => ({ item, index })).filter(({ index }) => index !== skip);
+  if (tiles.length === 0) return null;
+  const unseen = tiles.length - (VISIBLE - 1);
 
   return (
     <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-      {media.slice(0, VISIBLE).map((item, i) => {
-        const more = i === VISIBLE - 1 && media.length > VISIBLE;
+      {tiles.slice(0, VISIBLE).map(({ item, index }, i) => {
+        const more = i === VISIBLE - 1 && tiles.length > VISIBLE;
         const image = item.kind === "image" ? item.preview : item.poster;
         const label = more
           ? `Show all ${media.length} screenshots and trailers`
           : item.kind === "video"
             ? `Play trailer: ${item.title}`
-            : `Open ${title} screenshot ${i + 1}`;
+            : `Open ${title} screenshot ${index + 1}`;
 
         return (
           <button
             key={item.kind === "image" ? item.full : item.src}
             type="button"
             aria-label={label}
-            onClick={() => onOpen(i)}
+            onClick={() => onOpen(index)}
             className="group relative text-left"
           >
             <Cover src={image} alt="" className="aspect-video group-hover:border-spot" />

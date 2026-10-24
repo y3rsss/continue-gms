@@ -174,7 +174,7 @@ const GameView = ({ slug }: { slug: string | undefined }) => {
               )}
             </div>
           )}
-          <MediaGrid media={game.media} title={game.name} onOpen={setViewing} />
+          <MediaGrid media={game.media} title={game.name} skip={heroIndex} onOpen={setViewing} />
         </div>
 
         {game.similar.length > 0 && (
