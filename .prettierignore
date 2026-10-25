@@ -4,3 +4,4 @@ docs
 test-results
 playwright-report
 e2e/fixtures
+supabase/.temp
