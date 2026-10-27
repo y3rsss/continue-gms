@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Confirm your email</title>
+  </head>
+  <body style="margin: 0; padding: 0; background: #e1e4e9">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: #e1e4e9">
+      <tr>
+        <td align="center" style="padding: 24px 12px">
+          <table
+            role="presentation"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            style="max-width: 600px; background: #eceef1; border: 3px solid #15171c; color: #15171c"
+          >
+            <tr>
+              <td style="padding: 22px 28px 14px; border-bottom: 6px solid #15171c">
+                <span
+                  style="
+                    font-family: &quot;Arial Black&quot;, Arial, sans-serif;
+                    font-weight: 900;
+                    font-size: 30px;
+                    letter-spacing: -1px;
+                    text-transform: uppercase;
+                  "
+                  >Continue<span style="color: #d8352a">?</span></span
+                >
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 30px 28px 8px">
+                <p
+                  style="
+                    margin: 0 0 6px;
+                    font-family: &quot;Courier New&quot;, monospace;
+                    font-size: 11px;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    color: #5a606b;
+                  "
+                >
+                  Reader services
+                </p>
+                <h1
+                  style="
+                    margin: 0 0 18px;
+                    font-family: &quot;Arial Black&quot;, Arial, sans-serif;
+                    font-weight: 900;
+                    font-size: 38px;
+                    line-height: 1;
+                    letter-spacing: -1px;
+                    text-transform: uppercase;
+                  "
+                >
+                  Confirm your email
+                </h1>
+                <p
+                  style="margin: 0 0 24px; font-family: Arial, sans-serif; font-size: 17px; line-height: 1.5"
+                >
+                  One click and your account is ready. Your backlog will sync on every device you sign in on.
+                </p>
+                <a
+                  href="{{ .ConfirmationURL }}"
+                  style="
+                    display: inline-block;
+                    background: #15171c;
+                    color: #eceef1;
+                    text-decoration: none;
+                    padding: 16px 24px;
+                    font-family: &quot;Courier New&quot;, monospace;
+                    font-size: 14px;
+                    font-weight: bold;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                  "
+                  >Confirm email</a
+                >
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 24px 28px 28px">
+                <p
+                  style="
+                    margin: 0 0 6px;
+                    padding-top: 16px;
+                    border-top: 1.5px solid #15171c;
+                    font-family: &quot;Courier New&quot;, monospace;
+                    font-size: 11px;
+                    font-weight: bold;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                  "
+                >
+                  Button not working?
+                </p>
+                <p style="margin: 0 0 8px; font-family: Arial, sans-serif; font-size: 14px; color: #5a606b">
+                  Paste this link into your browser:
+                </p>
+                <p
+                  style="
+                    margin: 0;
+                    padding: 10px 12px;
+                    background: #e1e4e9;
+                    font-family: &quot;Courier New&quot;, monospace;
+                    font-size: 12px;
+                    line-height: 1.5;
+                    word-break: break-all;
+                  "
+                >
+                  {{ .ConfirmationURL }}
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 18px 28px; background: #15171c; color: #e9ebef">
+                <p style="margin: 0 0 6px; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5">
+                  Didn't sign up? Ignore this email. Nothing happens until someone clicks the button.
+                </p>
+                <p
+                  style="
+                    margin: 0;
+                    font-family: &quot;Courier New&quot;, monospace;
+                    font-size: 11px;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    color: #9198a6;
+                  "
+                >
+                  continue-gms.vercel.app
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
