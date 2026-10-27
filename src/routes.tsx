@@ -17,6 +17,7 @@ const router = createBrowserRouter([
       { path: "games", lazy: page(() => import("./pages/GamesPage")) },
       { path: "games/:slug", lazy: page(() => import("./pages/GamePage")) },
       { path: "backlog", lazy: page(() => import("./pages/BacklogPage")) },
+      { path: "privacy", lazy: page(() => import("./pages/PrivacyPage")) },
     ],
   },
 ]);
