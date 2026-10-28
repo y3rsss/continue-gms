@@ -1,15 +1,16 @@
 import { Link, useSearchParams } from "react-router";
 import { ArrowRight } from "lucide-react";
-import GameCard from "../components/GameCard";
+import GameCard, { GameCardSkeleton } from "../components/GameCard";
 import { STATUS_STYLE } from "@/lib/status";
 import { cn } from "@/lib/utils";
 import Tab from "../components/Tab";
-import { STATUSES, useBacklog, type Status } from "../hooks/useBacklog";
+import { STATUSES, useBacklog, useBacklogReady, type Status } from "../hooks/useBacklog";
 
 const order = Object.keys(STATUSES) as Status[];
 
 const BacklogPage = () => {
   const backlog = useBacklog();
+  const ready = useBacklogReady();
   const [params, setParams] = useSearchParams();
   const filter = order.find((s) => s === params.get("status"));
 
@@ -43,7 +44,13 @@ const BacklogPage = () => {
         ))}
       </div>
 
-      {shown.length === 0 ? (
+      {!ready && shown.length === 0 ? (
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }, (_, i) => (
+            <GameCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : shown.length === 0 ? (
         <div className="grid justify-items-start gap-3 border-t-[1.5px] border-ink py-8">
           <p className="max-w-[52ch] font-body text-lg">
             {entries.length === 0

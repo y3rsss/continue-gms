@@ -39,8 +39,9 @@ const PrivacyPage = () => (
     </Section>
     <Section title="In your browser">
       <p>
-        Your browser stores your sign-in session, your backlog when you are signed out, recently viewed games
-        and whether you read the day or night edition. None of it is used for tracking.
+        Your browser stores your sign-in session, your backlog (a copy of it while you are signed in, removed
+        when you sign out), recently viewed games and whether you read the day or night edition. None of it is
+        used for tracking.
       </p>
     </Section>
     <Section title="Who else handles it">
