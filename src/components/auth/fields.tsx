@@ -128,16 +128,18 @@ export const FormError = ({ children }: { children: ReactNode }) => (
 interface SubmitProps {
   pending: boolean;
   filled?: boolean;
+  className?: string;
   children: ReactNode;
 }
 
-export const SubmitButton = ({ pending, filled, children }: SubmitProps) => (
+export const SubmitButton = ({ pending, filled, className, children }: SubmitProps) => (
   <button
     type="submit"
     disabled={pending}
     className={cn(
       "label flex h-13 items-center justify-center gap-2 border-2 border-ink font-bold disabled:opacity-60",
       filled ? "bg-ink text-paper hover:bg-ink/85" : "hover:bg-ink hover:text-paper",
+      className,
     )}
   >
     {children}

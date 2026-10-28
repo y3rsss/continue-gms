@@ -16,7 +16,7 @@ const PrivacyPage = () => (
       <h1 className="wide text-[clamp(32px,5.5vw,62px)] leading-[0.85] font-black tracking-[-0.04em] uppercase">
         Privacy
       </h1>
-      <p className="label text-faded">Last updated October 27, 2026</p>
+      <p className="label text-faded">Last updated October 28, 2026</p>
     </header>
     <p className="max-w-[64ch] font-body text-lg leading-relaxed">
       Continue? is a free hobby project. You can browse without an account. If you make one, here is what we
@@ -64,11 +64,12 @@ const PrivacyPage = () => (
     </Section>
     <Section title="Deleting your account">
       <p>
-        Email{" "}
+        Go to Account settings and choose Delete account. Your account, profile and backlog are removed right
+        away. If you can't sign in anymore, email{" "}
         <a href={`mailto:${CONTACT}`} className="font-bold underline underline-offset-4">
           {CONTACT}
         </a>{" "}
-        from the address you signed up with and we will delete your account and everything in it.
+        from the address you signed up with and we will do it for you.
       </p>
     </Section>
   </div>
