@@ -1,5 +1,6 @@
 import { Link, NavLink, useLocation } from "react-router";
 import { cn } from "@/lib/utils";
+import Account from "./Account";
 import EditionToggle from "./EditionToggle";
 import SearchPalette from "./SearchPalette";
 
@@ -40,6 +41,7 @@ const NavBar = () => {
         <div className="ml-auto flex items-center gap-2 max-sm:order-last max-sm:w-full">
           <SearchPalette />
           <EditionToggle />
+          <Account />
         </div>
       </div>
     </header>
