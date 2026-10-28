@@ -72,7 +72,8 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      delete_account: { Args: never; Returns: undefined };
+      username_available: { Args: { name: string }; Returns: boolean };
     };
     Enums: {
       backlog_status: "want" | "playing" | "finished" | "dropped";
