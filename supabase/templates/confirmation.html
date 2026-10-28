@@ -17,12 +17,14 @@
             style="max-width: 600px; background: #eceef1; border: 3px solid #15171c; color: #15171c"
           >
             <tr>
-              <td style="padding: 22px 28px 14px; border-bottom: 6px solid #15171c">
+              <td style="padding: 22px 28px; border-bottom: 6px solid #15171c">
                 <span
                   style="
                     font-family: &quot;Arial Black&quot;, Arial, sans-serif;
                     font-weight: 900;
+                    display: block;
                     font-size: 30px;
+                    line-height: 1;
                     letter-spacing: -1px;
                     text-transform: uppercase;
                   "
@@ -32,18 +34,6 @@
             </tr>
             <tr>
               <td style="padding: 30px 28px 8px">
-                <p
-                  style="
-                    margin: 0 0 6px;
-                    font-family: &quot;Courier New&quot;, monospace;
-                    font-size: 11px;
-                    letter-spacing: 1px;
-                    text-transform: uppercase;
-                    color: #5a606b;
-                  "
-                >
-                  Reader services
-                </p>
                 <h1
                   style="
                     margin: 0 0 18px;
@@ -60,7 +50,7 @@
                 <p
                   style="margin: 0 0 24px; font-family: Arial, sans-serif; font-size: 17px; line-height: 1.5"
                 >
-                  One click and your account is ready. Your backlog will sync on every device you sign in on.
+                  Confirm {{ .Email }} and your account is ready. The link works once and expires in an hour.
                 </p>
                 <a
                   href="{{ .ConfirmationURL }}"
