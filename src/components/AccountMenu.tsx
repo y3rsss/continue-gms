@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Bookmark, ChevronDown, LogOut, Settings2, User } from "lucide-react";
+import { Bookmark, ChevronDown, LogOut, Settings2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,14 +60,6 @@ const AccountMenu = () => {
           )}
         </div>
         <DropdownMenuSeparator className={RULE} />
-        {profile && (
-          <DropdownMenuItem asChild className={ITEM}>
-            <Link to={`/u/${profile.username}`}>
-              <User />
-              My profile
-            </Link>
-          </DropdownMenuItem>
-        )}
         <DropdownMenuItem asChild className={ITEM}>
           <Link to="/backlog">
             <Bookmark />
