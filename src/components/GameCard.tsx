@@ -2,13 +2,15 @@ import { Link } from "react-router";
 import type { Game } from "@shared/types";
 import { platformAbbr, year } from "@/lib/format";
 import Meta from "./Meta";
-import { useStatus } from "../hooks/useBacklog";
+import { useStatus, type Status } from "../hooks/useBacklog";
 import Cover from "./Cover";
 import Score from "./Score";
 import StatusStamp from "./StatusStamp";
 
-const GameCard = ({ game }: { game: Game }) => {
-  const status = useStatus(game.slug);
+// pass status to stamp someone else's backlog, otherwise it shows yours
+const GameCard = ({ game, status: given }: { game: Game; status?: Status }) => {
+  const own = useStatus(game.slug);
+  const status = given ?? own;
 
   return (
     <Link to={`/games/${game.slug}`} className="group grid min-w-0 content-start gap-2">

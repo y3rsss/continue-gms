@@ -35,6 +35,9 @@ export const useUpdateProfile = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (profile) => queryClient.setQueryData(["profile", userId], profile),
+    onSuccess: (profile) => {
+      queryClient.setQueryData(["profile", userId], profile);
+      void queryClient.invalidateQueries({ queryKey: ["public-profile"] });
+    },
   });
 };

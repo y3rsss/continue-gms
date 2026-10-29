@@ -64,7 +64,7 @@ const AccountMenu = () => {
           <DropdownMenuItem asChild className={ITEM}>
             <Link to={`/u/${profile.username}`}>
               <User />
-              My shelf
+              My profile
             </Link>
           </DropdownMenuItem>
         )}

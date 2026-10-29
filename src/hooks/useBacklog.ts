@@ -19,7 +19,7 @@ export interface BacklogEntry {
 
 export type Backlog = Record<string, BacklogEntry>;
 
-// guest shelf while signed out, a copy of the account shelf while signed in
+// guest backlog while signed out, a copy of the account's while signed in
 const GUEST = "continue.backlog";
 const ACCOUNT = "continue.backlog.account";
 
@@ -50,7 +50,7 @@ function save(key: string, value: unknown) {
 
 const sync = () => import("@/lib/backlog-sync");
 
-// whose shelf is showing, null for the guest one. known before supabase loads so a reload doesn't flash empty
+// whose backlog is showing, null for the guest one. known before supabase loads so a reload doesn't flash empty
 let owner = typeof window === "undefined" ? null : (load<AccountCopy>(ACCOUNT)?.owner ?? null);
 let signedIn: string | null | undefined;
 let ready = true;

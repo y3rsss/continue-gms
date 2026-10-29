@@ -7,22 +7,22 @@ const VisibilityForm = ({ profile }: { profile: Profile }) => {
   const shown = update.isPending ? update.variables.is_public : profile.is_public;
 
   const options = [
-    { value: false, title: "Private", hint: "Only you can see your shelf." },
-    { value: true, title: "Public", hint: `Anyone can see it at /u/${profile.username}.` },
+    { value: false, title: "Private", hint: "Only you can see your profile and backlog." },
+    { value: true, title: "Public", hint: `Anyone can see them at /u/${profile.username}.` },
   ];
 
   const change = (is_public: boolean) =>
     update.mutate(
       { is_public },
       {
-        onSuccess: () => toast(is_public ? "Your shelf is public." : "Your shelf is private."),
-        onError: () => toast("Couldn't change who sees your shelf. Try again.", "alert"),
+        onSuccess: () => toast(is_public ? "Your profile is public." : "Your profile is private."),
+        onError: () => toast("Couldn't change who sees your profile. Try again.", "alert"),
       },
     );
 
   return (
     <fieldset className="grid gap-2 sm:grid-cols-2">
-      <legend className="sr-only">Who can see your shelf</legend>
+      <legend className="sr-only">Who can see your profile</legend>
       {options.map((option) => {
         const on = shown === option.value;
         return (

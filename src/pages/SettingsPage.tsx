@@ -40,7 +40,7 @@ const SettingsPage = () => {
           <Section title="Profile">
             <ProfileForm profile={profile} />
           </Section>
-          <Section title="Shelf">
+          <Section title="Visibility">
             <VisibilityForm profile={profile} />
           </Section>
           <Section title="Password">

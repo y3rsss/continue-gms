@@ -29,7 +29,7 @@ const PrivacyPage = () => (
         profile picture from them.
       </p>
       <p>
-        <strong>Your profile.</strong> A username, display name, profile picture link and whether your shelf
+        <strong>Your profile.</strong> A username, display name, profile picture link and whether your profile
         is public.
       </p>
       <p>
@@ -56,9 +56,9 @@ const PrivacyPage = () => (
         <li>Game images load from RAWG, so their servers see your IP address like any website would.</li>
       </ul>
     </Section>
-    <Section title="Who sees your shelf">
+    <Section title="Who sees your profile">
       <p>
-        Your shelf is private when you sign up. If you make it public, anyone with the link can see your
+        Your profile is private when you sign up. If you make it public, anyone with the link can see your
         username, display name, picture and backlog. Your email is never shown.
       </p>
     </Section>
