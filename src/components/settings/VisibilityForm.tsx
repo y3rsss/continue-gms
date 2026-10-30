@@ -33,7 +33,7 @@ const VisibilityForm = ({ profile, className }: { profile: Profile; className?: 
       );
 
   return (
-    <div className="grid gap-3">
+    <div className="grid grid-cols-1 gap-3">
       <fieldset className={cn("grid gap-2 sm:grid-cols-2", className)}>
         <legend className="sr-only">Who can see your profile</legend>
         {OPTIONS.map((option) => {
