@@ -152,6 +152,11 @@ const STORE_NAMES: Record<number, string> = {
   11: "Epic Games Store",
 };
 
+export function steamAppId(url: string): string | null {
+  const match = url.match(/store\.steampowered\.com\/app\/(\d+)/);
+  return match ? match[1] : null;
+}
+
 export const toStoreOffer = (link: RawgStoreLink): StoreOffer => ({
   store: STORE_NAMES[link.store_id] ?? "Other store",
   url: link.url.replace(/^http:/, "https:"),

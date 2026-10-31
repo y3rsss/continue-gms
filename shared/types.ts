@@ -45,10 +45,24 @@ export interface StoreOffer {
   regularPrice: number | null;
 }
 
+export interface LowestEver {
+  price: number;
+  date: string;
+}
+
 export interface WhereToBuy {
   offers: StoreOffer[];
-  lowestEver: { price: number; date: string } | null;
+  lowestEver: LowestEver | null;
 }
+
+/** the cheapest PC offer right now, USD */
+export interface Price {
+  amount: number;
+  regular: number;
+  store: string;
+}
+
+export type Prices = Record<string, Price | null>;
 
 export interface GamesPage {
   results: Game[];

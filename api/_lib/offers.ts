@@ -1,39 +1,30 @@
 import type { StoreOffer, WhereToBuy } from "../../shared/types.js";
-import { findDeals, steamAppId, type Deals } from "./cheapshark.js";
-import { rawgFetch, toStoreOffer, type RawgList, type RawgStoreLink } from "./rawg.js";
+import { priceStore } from "./price-store.js";
+import { priceRows, type PriceRow, type PriceStore } from "./prices.js";
+import { rawgFetch, steamAppId, toStoreOffer, type RawgList, type RawgStoreLink } from "./rawg.js";
 
-async function dealsFor(offers: StoreOffer[]): Promise<Deals | null> {
-  const steamId = offers.map((offer) => steamAppId(offer.url)).find((id) => id !== null);
-  if (!steamId) return null;
+const storeKey = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z]/g, "")
+    .replace(/(games?)?store$/, "");
+
+export async function whereToBuy(slug: string, store?: PriceStore): Promise<WhereToBuy> {
+  const data = await rawgFetch<RawgList<RawgStoreLink>>(`games/${slug}/stores`);
+  const links = data.results.filter((link) => link.url).map(toStoreOffer);
+  const steamId = links.map((link) => steamAppId(link.url)).find((id) => id !== null) ?? null;
+
+  let row: PriceRow | undefined;
   try {
-    return await findDeals(steamId);
+    row = (await priceRows([slug], store ?? priceStore(), { [slug]: steamId })).get(slug);
   } catch (error) {
     console.error(error);
-    return null;
   }
-}
 
-function merge(offers: StoreOffer[], deals: StoreOffer[]): StoreOffer[] {
-  const merged = offers.map((offer) => {
-    const deal = deals.find((d) => d.store === offer.store);
-    return deal ? { ...offer, price: deal.price, regularPrice: deal.regularPrice } : offer;
-  });
-  const extra = deals.filter((deal) => !offers.some((offer) => offer.store === deal.store));
-
-  return [...merged, ...extra].sort((a, b) => {
-    if (a.price === null) return b.price === null ? 0 : 1;
-    if (b.price === null) return -1;
-    return a.price - b.price;
-  });
-}
-
-export async function whereToBuy(slug: string): Promise<WhereToBuy> {
-  const data = await rawgFetch<RawgList<RawgStoreLink>>(`games/${slug}/stores`);
-  const offers = data.results.filter((link) => link.url).map(toStoreOffer);
-  const deals = await dealsFor(offers);
-
+  const priced: StoreOffer[] = row?.offers ?? [];
+  const pricedStores = new Set(priced.map((offer) => storeKey(offer.store)));
   return {
-    offers: merge(offers, deals?.offers ?? []),
-    lowestEver: deals?.lowestEver ?? null,
+    offers: [...priced, ...links.filter((link) => !pricedStores.has(storeKey(link.store)))],
+    lowestEver: row?.lowest ?? null,
   };
 }

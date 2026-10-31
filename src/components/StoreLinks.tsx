@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import type { StoreOffer, WhereToBuy } from "@shared/types";
-import { money, monthYear, percentOff } from "@/lib/format";
+import { discount, money, monthYear, priceLabel } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const VISIBLE = 5;
 
 const Price = ({ offer }: { offer: StoreOffer }) => {
   if (offer.price === null) return null;
-  const regularPrice = offer.regularPrice ?? offer.price;
-  const off = percentOff(offer.price, regularPrice);
+  const off = discount(offer.price, offer.regularPrice);
 
   return (
     <>
@@ -18,11 +17,11 @@ const Price = ({ offer }: { offer: StoreOffer }) => {
           <span className="bg-house px-1 text-white">−{off}%</span>
           <s className="font-normal opacity-60">
             <span className="sr-only">was </span>
-            {money(regularPrice)}
+            {money(offer.regularPrice!)}
           </s>
         </>
       )}
-      <span>{offer.price === 0 ? "Free" : money(offer.price)}</span>
+      <span>{priceLabel(offer.price)}</span>
     </>
   );
 };

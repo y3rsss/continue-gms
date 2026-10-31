@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET as game } from "../game.js";
 import { GET as games } from "../games.js";
+import { GET as prices } from "../prices.js";
 import { GET as search } from "../search.js";
 import { GET as stores } from "../stores.js";
 import { fakeFetch } from "./fake-fetch.js";
@@ -38,6 +39,10 @@ describe("input checks", () => {
     [game, "/api/game"],
     [game, "/api/game?slug=Not%20A%20Slug!"],
     [stores, "/api/stores?slug=../../etc"],
+    [prices, "/api/prices"],
+    [prices, "/api/prices?slugs="],
+    [prices, "/api/prices?slugs=hades,Not%20A%20Slug"],
+    [prices, `/api/prices?slugs=${Array.from({ length: 41 }, (_, i) => `game-${i}`).join(",")}`],
     [search, "/api/search?q=x"],
     [search, `/api/search?q=${"a".repeat(61)}`],
   ])("rejects bad input to %o at %s", async (endpoint, path) => {

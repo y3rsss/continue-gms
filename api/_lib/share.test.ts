@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET as share } from "../share.js";
 import { fakeFetch } from "./fake-fetch.js";
+import { deal } from "./fake-prices.js";
+
+vi.mock("./price-store.js", async () => {
+  const { memoryStore } = await import("./fake-prices.js");
+  return { priceStore: () => memoryStore() };
+});
 
 const details = {
   id: 9767,
@@ -22,13 +28,14 @@ const steamLink = {
   results: [{ store_id: 1, url: "https://store.steampowered.com/app/367520/" }],
 };
 
-function fakeApis(game: object | undefined, price = { now: "9.99", regular: "14.99", lowest: "2.99" }) {
+function fakeApis(game: object | undefined, price = { now: 9.99, regular: 14.99, lowest: 2.99 }) {
   fakeFetch((url) => {
     if (url.hostname === "api.rawg.io") return url.pathname.endsWith("/stores") ? steamLink : game;
-    if (url.searchParams.get("steamAppID")) return [{ gameID: "1" }];
+    if (url.pathname.startsWith("/lookup/")) return { "app/367520": "hk" };
+    if (url.pathname === "/games/prices/v3")
+      return [{ id: "hk", deals: [deal("Steam", price.now, price.regular)] }];
     return {
-      cheapestPriceEver: { price: price.lowest, date: 1712840581 },
-      deals: [{ storeID: "1", dealID: "d", price: price.now, retailPrice: price.regular }],
+      prices: [{ id: "hk", lowest: { price: { amount: price.lowest }, timestamp: "2024-04-11T10:00:00Z" } }],
     };
   });
 }
@@ -43,6 +50,7 @@ const meta = (html: string, property: string) =>
 
 beforeEach(() => {
   process.env.RAWG_API_KEY = "test-key";
+  process.env.ITAD_API_KEY = "itad-key";
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -65,7 +73,7 @@ describe("link preview page", () => {
   });
 
   it("mentions when today's price is the lowest ever", async () => {
-    fakeApis(details, { now: "2.99", regular: "14.99", lowest: "2.99" });
+    fakeApis(details, { now: 2.99, regular: 14.99, lowest: 2.99 });
     const { html } = await preview("hollow-knight");
     expect(meta(html, "og:description")).toContain("From $2.99 on Steam (80% off). Lowest price ever.");
   });

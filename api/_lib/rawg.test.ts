@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Media } from "../../shared/types.js";
 import {
+  steamAppId,
   toGameDetails,
   toStoreOffer,
   type RawgGame,
@@ -96,5 +97,18 @@ describe("toStoreOffer", () => {
 
   it("falls back to a generic name for stores it doesn't know", () => {
     expect(toStoreOffer({ store_id: 42, url: "https://example.com" }).store).toBe("Other store");
+  });
+});
+
+describe("steamAppId", () => {
+  it("reads the app id from a Steam store link", () => {
+    expect(steamAppId("https://store.steampowered.com/app/367520/")).toBe("367520");
+    expect(steamAppId("http://store.steampowered.com/app/292030/The_Witcher_3_Wild_Hunt/")).toBe("292030");
+  });
+
+  it("returns null for links that aren't Steam games", () => {
+    expect(steamAppId("https://www.gog.com/game/hollow_knight")).toBeNull();
+    expect(steamAppId("https://store.steampowered.com/bundle/123/")).toBeNull();
+    expect(steamAppId("")).toBeNull();
   });
 });

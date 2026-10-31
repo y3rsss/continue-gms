@@ -40,6 +40,30 @@ export type Database = {
           },
         ];
       };
+      game_prices: {
+        Row: {
+          checked_at: string;
+          game_slug: string;
+          itad_id: string | null;
+          lowest: Json | null;
+          offers: Json;
+        };
+        Insert: {
+          checked_at?: string;
+          game_slug: string;
+          itad_id?: string | null;
+          lowest?: Json | null;
+          offers?: Json;
+        };
+        Update: {
+          checked_at?: string;
+          game_slug?: string;
+          itad_id?: string | null;
+          lowest?: Json | null;
+          offers?: Json;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;

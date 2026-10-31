@@ -16,7 +16,7 @@ const PrivacyPage = () => (
       <h1 className="wide text-[clamp(32px,5.5vw,62px)] leading-[0.85] font-black tracking-[-0.04em] uppercase">
         Privacy
       </h1>
-      <p className="label text-faded">Last updated October 28, 2026</p>
+      <p className="label text-faded">Last updated October 30, 2026</p>
     </header>
     <p className="max-w-[64ch] font-body text-lg leading-relaxed">
       Continue? is a free hobby project. You can browse without an account. If you make one, here is what we
@@ -54,6 +54,7 @@ const PrivacyPage = () => (
         <li>Google or GitHub, only if you sign in with them.</li>
         <li>Gmail sends the confirmation and password reset emails.</li>
         <li>Game images load from RAWG, so their servers see your IP address like any website would.</li>
+        <li>Store links go through IsThereAnyDeal on their way to the store.</li>
       </ul>
     </Section>
     <Section title="Who sees your profile">

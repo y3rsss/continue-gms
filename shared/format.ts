@@ -6,6 +6,11 @@ export const firstSentence = (text: string, max = 160) => {
 export const money = (amount: number) =>
   amount.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
+export const priceLabel = (amount: number) => (amount === 0 ? "Free" : money(amount));
+
+export const discount = (price: number, regularPrice: number | null) =>
+  regularPrice && regularPrice > price ? percentOff(price, regularPrice) : 0;
+
 export const percentOff = (price: number, regularPrice: number) =>
   Math.round((1 - price / regularPrice) * 100);
 

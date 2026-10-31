@@ -1,6 +1,6 @@
 import type { Platform } from "@shared/types";
 
-export { firstSentence, money, monthYear, percentOff } from "@shared/format";
+export { discount, firstSentence, money, monthYear, percentOff, priceLabel } from "@shared/format";
 
 export const year = (date: string | null) => date?.slice(0, 4) ?? "TBA";
 

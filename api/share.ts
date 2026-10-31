@@ -1,4 +1,4 @@
-import { firstSentence, money, monthYear, percentOff } from "../shared/format.js";
+import { discount, firstSentence, money, monthYear } from "../shared/format.js";
 import type { WhereToBuy } from "../shared/types.js";
 import { escapeHtml } from "./_lib/html.js";
 import { SLUG, UpstreamError, cacheFor } from "./_lib/http.js";
@@ -53,7 +53,7 @@ function priceLine(buy: WhereToBuy | null): string | null {
   if (!best || best.price === null) return null;
   if (best.price === 0) return `Free on ${best.store}.`;
 
-  const off = best.regularPrice ? percentOff(best.price, best.regularPrice) : 0;
+  const off = discount(best.price, best.regularPrice);
   const sale = off > 0 ? ` (${off}% off)` : "";
   const record = buy?.lowestEver && best.price <= buy.lowestEver.price ? " Lowest price ever." : "";
   return `From ${money(best.price)} on ${best.store}${sale}.${record}`;
