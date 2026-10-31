@@ -2,15 +2,18 @@ import { Link } from "react-router";
 import type { Game } from "@shared/types";
 import { platformAbbr, year } from "@/lib/format";
 import { useStatus } from "../hooks/useBacklog";
+import { usePrice } from "../hooks/usePrice";
 import StatusStamp from "./StatusStamp";
 import Cover from "./Cover";
+import { PriceText } from "./PriceTag";
 import Score from "./Score";
 
 export const ROW_GRID =
-  "grid grid-cols-[34px_48px_minmax(0,1fr)_48px] items-center gap-3 sm:grid-cols-[52px_64px_minmax(0,1fr)_64px_56px] sm:gap-4 lg:grid-cols-[52px_64px_minmax(0,1fr)_64px_170px_56px]";
+  "grid grid-cols-[34px_48px_minmax(0,1fr)_48px] items-center gap-3 sm:grid-cols-[52px_64px_minmax(0,1fr)_64px_96px_56px] sm:gap-4 lg:grid-cols-[52px_64px_minmax(0,1fr)_64px_170px_96px_56px]";
 
 const GameRow = ({ game, rank }: { game: Game; rank: number }) => {
   const status = useStatus(game.slug);
+  const { data: price } = usePrice(game.slug);
 
   return (
     <Link
@@ -27,11 +30,13 @@ const GameRow = ({ game, rank }: { game: Game; rank: number }) => {
         </b>
         <span className="truncate font-body text-[12.5px] text-faded">
           {status && <StatusStamp status={status} small />}
+          {price && <PriceText price={price} className="mr-2 text-[10.5px] text-ink sm:hidden" />}
           {game.genres.map((g) => g.name).join(", ")}
         </span>
       </span>
       <span className="label hidden sm:block">{year(game.released)}</span>
       <span className="label hidden truncate lg:block">{platformAbbr(game.platforms)}</span>
+      <span className="hidden sm:block">{price && <PriceText price={price} />}</span>
       <Score value={game.metascore} large />
     </Link>
   );

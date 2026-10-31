@@ -16,6 +16,16 @@ test("a genre tab filters the index through the URL", async ({ page }) => {
   );
 });
 
+test("each game shows its best price, in the list and on the grid", async ({ page }) => {
+  const witcher = page.getByRole("link", { name: /The Witcher 3/ }).first();
+  await expect(witcher).toContainText("−75%");
+  await expect(witcher).toContainText("$9.99");
+  await expect(page.getByRole("link", { name: /Counter-Strike/ }).first()).toContainText("Free");
+
+  await page.getByRole("button", { name: "Grid", exact: true }).click();
+  await expect(page.getByRole("link", { name: /The Witcher 3/ }).first()).toContainText("Best price $9.99");
+});
+
 test("the list or grid choice survives a reload", async ({ page }) => {
   await page.getByRole("button", { name: "Grid", exact: true }).click();
   await page.reload();

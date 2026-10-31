@@ -71,6 +71,7 @@ const GameResults = ({
             <span>Game</span>
             <span className="hidden sm:block">Year</span>
             <span className="hidden lg:block">Platforms</span>
+            <span className="hidden sm:block">Price</span>
             <span className="text-center">Score</span>
           </div>
           {games.map((game, i) => (

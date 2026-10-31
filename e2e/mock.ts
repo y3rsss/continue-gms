@@ -14,6 +14,8 @@ function fixtureFor(url: URL): string | null {
       return "game";
     case "/api/stores":
       return "stores";
+    case "/api/prices":
+      return "prices";
     case "/api/genres":
       return "genres";
     case "/api/platforms":
