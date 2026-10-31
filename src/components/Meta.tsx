@@ -14,7 +14,7 @@ const Meta = ({ items, className }: Props) => {
       {shown.map((item, i) => (
         <Fragment key={item}>
           {i > 0 && <span aria-hidden className="h-2.5 w-px shrink-0 bg-current opacity-40" />}
-          <span className="truncate">{item}</span>
+          <span className={i < shown.length - 1 ? "shrink-0" : "truncate"}>{item}</span>
         </Fragment>
       ))}
     </span>

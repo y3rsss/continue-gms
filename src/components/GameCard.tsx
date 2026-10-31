@@ -13,7 +13,7 @@ const GameCard = ({ game, status: given }: { game: Game; status?: Status }) => {
   const status = given ?? own;
 
   return (
-    <Link to={`/games/${game.slug}`} className="group grid min-w-0 content-start gap-2">
+    <Link to={`/games/${game.slug}`} className="group grid min-w-0 grid-cols-1 content-start gap-2">
       <Cover src={game.image} alt={game.name}>
         {status && <StatusStamp status={status} />}
       </Cover>
