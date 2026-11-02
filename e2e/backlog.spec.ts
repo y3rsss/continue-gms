@@ -1,11 +1,5 @@
-import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import type { Game } from "../shared/types";
-import { mockApi } from "./mock";
-
-const games: Game[] = JSON.parse(
-  readFileSync(new URL("./fixtures/games.json", import.meta.url), "utf8"),
-).results;
+import { game, mockApi } from "./mock";
 
 const stamps = {
   "grand-theft-auto-v": "want",
@@ -19,7 +13,7 @@ async function seedBacklog(page: Page, backlog: Record<string, string>) {
   const entries = Object.fromEntries(
     Object.entries(backlog).map(([slug, status], i) => [
       slug,
-      { status, game: games.find((game) => game.slug === slug), updatedAt: 100 - i },
+      { status, game: game(slug), updatedAt: 100 - i },
     ]),
   );
   await page.addInitScript((data) => localStorage.setItem("continue.backlog", data), JSON.stringify(entries));
@@ -35,8 +29,8 @@ test.beforeEach(async ({ page }) => {
 test("On sale keeps the status and sorts by biggest discount", async ({ page }) => {
   await seedBacklog(page, stamps);
   await page.goto("/backlog");
-  await page.getByRole("button", { name: /Want to play 4/ }).click();
-  await page.getByRole("button", { name: /On sale 2/ }).click();
+  await page.getByRole("button", { name: "Want to play 4", exact: true }).click();
+  await page.getByRole("button", { name: "On sale 2", exact: true }).click();
   await expect(page).toHaveURL(/status=want/);
   await expect(page).toHaveURL(/sale=1/);
   await expect(titles(page)).toHaveText(["The Witcher 3: Wild Hunt", "Tomb Raider"]);
