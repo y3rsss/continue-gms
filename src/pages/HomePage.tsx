@@ -3,11 +3,14 @@ import { ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { GamesPage } from "@shared/types";
 import { count, firstSentence } from "@/lib/format";
+import { isOnSale, sortEntries } from "@/lib/sale";
 import { getJson } from "../services/api";
 import Rail from "../components/Rail";
 import ScoreStamp from "../components/ScoreStamp";
+import { useBacklog } from "../hooks/useBacklog";
 import useGame from "../hooks/useGame";
 import useList from "../hooks/useList";
+import { usePrices } from "../hooks/usePrice";
 
 const teasers = [
   { to: "/games?sort=metascore", title: "All-time greats", text: "Every game ranked by its Metascore" },
@@ -20,6 +23,16 @@ const teasers = [
 ];
 
 const HomePage = () => {
+  const backlog = useBacklog();
+  const wanted = Object.values(backlog).filter((e) => e.status === "want");
+  const { prices } = usePrices(wanted.map((e) => e.game.slug));
+  const deals = sortEntries(
+    wanted.filter((e) => isOnSale(prices[e.game.slug])),
+    prices,
+    "discount",
+  )
+    .slice(0, 12)
+    .map((e) => e.game);
   const trending = useList("trending", 13);
   const fresh = useList("new");
   const greats = useList("greats");
@@ -108,6 +121,9 @@ const HomePage = () => {
           ))}
         </nav>
       </header>
+      {deals.length > 0 && (
+        <Rail title="Want to play, on sale" games={deals} more="/backlog?status=want&sale=1&sort=discount" />
+      )}
 
       <Rail title="Trending now" games={trending.data?.results.slice(1)} more="/games?sort=added" />
       <Rail title="New and notable" games={fresh.data?.results} />

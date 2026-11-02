@@ -26,6 +26,7 @@ async function seedBacklog(page: Page, backlog: Record<string, string>) {
 }
 
 const titles = (page: Page) => page.getByRole("main").locator("a[href^='/games/'] .narrow");
+const coverRow = (page: Page) => page.getByRole("heading", { name: "Want to play, on sale" });
 
 test.beforeEach(async ({ page }) => {
   await mockApi(page);
@@ -65,4 +66,26 @@ test("says when prices can't load, and a price sort still lists the games", asyn
 
   await page.goto("/backlog?sort=price");
   await expect(titles(page)).toHaveCount(5);
+});
+
+test("the cover shows Want to play games on sale, biggest discount first", async ({ page }) => {
+  await seedBacklog(page, stamps);
+  await page.goto("/");
+  const row = page.locator("section", { has: coverRow(page) });
+  await expect(row.locator(".narrow")).toHaveText(["Tomb Raider", "The Witcher 3: Wild Hunt"]);
+
+  await row.getByRole("link", { name: "See all" }).click();
+  await expect(page).toHaveURL(/\/backlog\?status=want&sale=1&sort=discount/);
+  await expect(titles(page)).toHaveText(["Tomb Raider", "The Witcher 3: Wild Hunt"]);
+});
+
+test("the cover leaves the row out when nothing on Want to play is on sale", async ({ page }) => {
+  await seedBacklog(page, {
+    "grand-theft-auto-v": "want",
+    "red-dead-redemption-2": "want",
+    "tomb-raider": "finished",
+  });
+  await page.goto("/");
+  await expect(page.getByText("Best price").first()).toBeAttached();
+  await expect(coverRow(page)).toHaveCount(0);
 });
