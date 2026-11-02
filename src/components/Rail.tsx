@@ -26,7 +26,7 @@ const Rail = ({ title, games, more }: Props) => {
           </Link>
         )}
       </div>
-      <div className="-mx-4 grid auto-cols-[72%] grid-flow-col gap-4 overflow-x-auto px-4 pb-1.5 [scrollbar-width:thin] sm:mx-0 sm:auto-cols-[minmax(210px,1fr)] sm:px-0">
+      <div className="-mx-4 grid auto-cols-[72%] grid-flow-col gap-4 overflow-x-auto px-4 pb-1.5 [scrollbar-width:thin] sm:mx-0 sm:auto-cols-[210px] sm:px-0">
         {games
           ? games.map((game) => <GameCard key={game.id} game={game} />)
           : Array.from({ length: 5 }, (_, i) => <GameCardSkeleton key={i} />)}
