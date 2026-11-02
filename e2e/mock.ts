@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
-import type { Game } from "../shared/types";
+import type { Game, Prices } from "../shared/types";
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8");
 
@@ -11,6 +11,13 @@ export const game = (slug: string) => {
   if (!found) throw new Error(`No fixture game ${slug}`);
   return found;
 };
+
+const prices: Prices = JSON.parse(fixture("prices"));
+
+const pricesFor = (url: URL) =>
+  Object.fromEntries(
+    (url.searchParams.get("slugs")?.split(",") ?? []).map((slug) => [slug, prices[slug] ?? null]),
+  );
 
 function fixtureFor(url: URL): string | null {
   switch (url.pathname) {
@@ -23,8 +30,6 @@ function fixtureFor(url: URL): string | null {
       return "game";
     case "/api/stores":
       return "stores";
-    case "/api/prices":
-      return "prices";
     case "/api/genres":
       return "genres";
     case "/api/platforms":
@@ -43,7 +48,11 @@ export async function mockApi(page: Page) {
     (route) => route.abort(),
   );
   await page.route("**/api/**", (route) => {
-    const name = fixtureFor(new URL(route.request().url()));
+    const url = new URL(route.request().url());
+    if (url.pathname === "/api/prices") {
+      return route.fulfill({ contentType: "application/json", body: JSON.stringify(pricesFor(url)) });
+    }
+    const name = fixtureFor(url);
     return name
       ? route.fulfill({ contentType: "application/json", body: fixture(name) })
       : route.fulfill({ status: 404, contentType: "application/json", body: '{"error":"Not mocked"}' });

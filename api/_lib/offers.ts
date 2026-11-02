@@ -16,7 +16,7 @@ export async function whereToBuy(slug: string, store?: PriceStore): Promise<Wher
 
   let row: PriceRow | undefined;
   try {
-    row = (await priceRows([slug], store ?? priceStore(), { [slug]: steamId })).get(slug);
+    row = (await priceRows([slug], store ?? priceStore(), { [slug]: steamId })).rows.get(slug);
   } catch (error) {
     console.error(error);
   }

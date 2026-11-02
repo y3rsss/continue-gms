@@ -18,6 +18,8 @@ const row = (game_slug: string, itad_id: string | null, checked_at: string): Pri
   checked_at,
 });
 
+const newGames = (count: number) => Array.from({ length: count }, (_, i) => `new-game-${i}`);
+
 beforeEach(() => {
   process.env.RAWG_API_KEY = "rawg-key";
   process.env.ITAD_API_KEY = "itad-key";
@@ -33,7 +35,7 @@ describe("priceRows", () => {
   it("looks up a new game through its Steam page and saves it", async () => {
     fakePriceApis();
     const store = memoryStore();
-    const hk = (await priceRows(["hollow-knight"], store)).get("hollow-knight");
+    const hk = (await priceRows(["hollow-knight"], store)).rows.get("hollow-knight");
     expect(hk).toMatchObject({
       itad_id: "hk",
       offers: [{ store: "GOG", price: 9.99 }, { store: "Steam" }],
@@ -45,26 +47,28 @@ describe("priceRows", () => {
   it("answers from the database while prices are fresh", async () => {
     const fetch = fakePriceApis();
     const store = memoryStore([row("hollow-knight", "hk", hoursAgo(1))]);
-    expect((await priceRows(["hollow-knight"], store)).get("hollow-knight")?.offers[0].price).toBe(19.99);
+    expect((await priceRows(["hollow-knight"], store)).rows.get("hollow-knight")?.offers[0].price).toBe(
+      19.99,
+    );
     expect(fetch).not.toHaveBeenCalled();
   });
 
   it("refreshes stale prices without asking RAWG again", async () => {
     const fetch = fakePriceApis();
     const store = memoryStore([row("hollow-knight", "hk", hoursAgo(13))]);
-    expect((await priceRows(["hollow-knight"], store)).get("hollow-knight")?.offers[0].price).toBe(9.99);
+    expect((await priceRows(["hollow-knight"], store)).rows.get("hollow-knight")?.offers[0].price).toBe(9.99);
     expect(calledUrls(fetch).some((url) => url.startsWith("api.rawg.io"))).toBe(false);
   });
 
   it("finds PC games without a Steam page by their title", async () => {
     fakePriceApis();
-    const aw2 = (await priceRows(["alan-wake-2"], memoryStore())).get("alan-wake-2");
+    const aw2 = (await priceRows(["alan-wake-2"], memoryStore())).rows.get("alan-wake-2");
     expect(aw2).toMatchObject({ itad_id: "aw2", offers: [{ store: "Epic Game Store", price: 29.99 }] });
   });
 
   it("saves console games as missing without matching them by title", async () => {
     const fetch = fakePriceApis();
-    const ghost = (await priceRows(["ghost-of-yotei"], memoryStore())).get("ghost-of-yotei");
+    const ghost = (await priceRows(["ghost-of-yotei"], memoryStore())).rows.get("ghost-of-yotei");
     expect(ghost).toMatchObject({ itad_id: null, offers: [] });
     expect(calledUrls(fetch)).not.toContain("api.isthereanydeal.com/lookup/id/title/v1");
   });
@@ -80,7 +84,7 @@ describe("priceRows", () => {
   it("doesn't save games RAWG doesn't know", async () => {
     fakePriceApis();
     const store = memoryStore();
-    const rows = await priceRows(["no-such-game", "hollow-knight"], store);
+    const { rows } = await priceRows(["no-such-game", "hollow-knight"], store);
     expect(rows.has("no-such-game")).toBe(false);
     expect(store.rows.has("no-such-game")).toBe(false);
     expect(store.rows.has("hollow-knight")).toBe(true);
@@ -94,7 +98,7 @@ describe("priceRows", () => {
 
   it("treats a slug named like an object property as a normal game", async () => {
     const fetch = fakePriceApis();
-    const rows = await priceRows(["constructor", "hollow-knight"], memoryStore());
+    const { rows } = await priceRows(["constructor", "hollow-knight"], memoryStore());
     expect(rows.get("hollow-knight")?.itad_id).toBe("hk");
     const bodies = fetch.mock.calls.map(([, init]) => String(init?.body ?? ""));
     expect(bodies.some((body) => body.includes("function"))).toBe(false);
@@ -103,7 +107,7 @@ describe("priceRows", () => {
   it("still refreshes stale prices when looking up a new game fails", async () => {
     fakePriceApis({ lookupDown: true });
     const store = memoryStore([row("hollow-knight", "hk", hoursAgo(13))]);
-    const rows = await priceRows(["hollow-knight", "alan-wake-2"], store);
+    const { rows } = await priceRows(["hollow-knight", "alan-wake-2"], store);
     expect(rows.get("hollow-knight")?.offers[0].price).toBe(9.99);
     expect(rows.has("alan-wake-2")).toBe(false);
   });
@@ -111,8 +115,27 @@ describe("priceRows", () => {
   it("keeps the old prices when IsThereAnyDeal is down", async () => {
     fakePriceApis({ itadDown: true });
     const store = memoryStore([row("hollow-knight", "hk", hoursAgo(13))]);
-    expect((await priceRows(["hollow-knight"], store)).get("hollow-knight")?.offers[0].price).toBe(19.99);
+    expect((await priceRows(["hollow-knight"], store)).rows.get("hollow-knight")?.offers[0].price).toBe(
+      19.99,
+    );
     expect(store.write).not.toHaveBeenCalled();
+  });
+
+  it("looks up at most 10 games per request, new games first, and leaves the rest for later", async () => {
+    const fetch = fakePriceApis();
+    const store = memoryStore([row("ghost-of-yotei", null, hoursAgo(24 * 8))]);
+    const { rows, deferred } = await priceRows(["ghost-of-yotei", ...newGames(10), "one-more-game"], store);
+    expect(calledUrls(fetch).filter((url) => url.startsWith("api.rawg.io"))).toHaveLength(10);
+    expect(deferred).toEqual(["one-more-game"]);
+    expect(rows.get("ghost-of-yotei")?.itad_id).toBeNull();
+  });
+
+  it("doesn't count games it already has toward the limit", async () => {
+    fakePriceApis();
+    const known = newGames(20).map((slug) => row(slug, "hk", hoursAgo(13)));
+    const { rows, deferred } = await priceRows([...newGames(20), "hollow-knight"], memoryStore(known));
+    expect(deferred).toEqual([]);
+    expect(rows.get("hollow-knight")?.itad_id).toBe("hk");
   });
 });
 
@@ -133,6 +156,16 @@ describe("/api/prices", () => {
     fakePriceApis();
     const response = await call("hollow-knight,no-such-game");
     expect(await response.json()).toMatchObject({ "no-such-game": null });
+    expect(response.headers.get("Cache-Control")).toContain("s-maxage=60,");
+  });
+
+  it("leaves out games over the lookup limit, so the app asks for them again", async () => {
+    fakePriceApis();
+    const response = await call(["hollow-knight", ...newGames(10)].join(","));
+    expect(await response.json()).toEqual({
+      "hollow-knight": { amount: 9.99, regular: 14.99, store: "GOG" },
+      ...Object.fromEntries(newGames(9).map((slug) => [slug, null])),
+    });
     expect(response.headers.get("Cache-Control")).toContain("s-maxage=60,");
   });
 });

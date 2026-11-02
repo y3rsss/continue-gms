@@ -11,6 +11,11 @@ interface Waiter {
 let queue = new Map<string, Waiter[]>();
 let timer: ReturnType<typeof setTimeout> | undefined;
 
+function enqueue(slug: string, waiter: Waiter) {
+  queue.set(slug, [...(queue.get(slug) ?? []), waiter]);
+  timer ??= setTimeout(flush, 10);
+}
+
 function flush() {
   const batch = queue;
   queue = new Map();
@@ -20,18 +25,22 @@ function flush() {
     const chunk = slugs.slice(i, i + MAX_PRICED_GAMES);
     const settle = (each: (waiter: Waiter, slug: string) => void) =>
       chunk.forEach((slug) => batch.get(slug)!.forEach((waiter) => each(waiter, slug)));
-    getJson<Prices>("/api/prices", { slugs: chunk.join(",") }).then(
-      (prices) => settle((waiter, slug) => waiter.resolve(prices[slug] ?? null)),
-      (error) => settle((waiter) => waiter.reject(error)),
-    );
+    getJson<Prices>("/api/prices", { slugs: chunk.join(",") })
+      .then((prices) => {
+        const answered = (slug: string) => Object.hasOwn(prices, slug);
+        if (!chunk.some(answered)) throw new Error("No prices came back");
+        settle((waiter, slug) =>
+          answered(slug) ? waiter.resolve(prices[slug] ?? null) : enqueue(slug, waiter),
+        );
+      })
+      .catch((error) => settle((waiter) => waiter.reject(error)));
   }
 }
 
 const loadPrice = (slug: string) =>
   new Promise<Price | null>((resolve, reject) => {
     if (!SLUG.test(slug)) return resolve(null);
-    queue.set(slug, [...(queue.get(slug) ?? []), { resolve, reject }]);
-    timer ??= setTimeout(flush, 10);
+    enqueue(slug, { resolve, reject });
   });
 
 const priceQuery = (slug: string) =>

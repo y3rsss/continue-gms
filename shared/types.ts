@@ -62,7 +62,7 @@ export interface Price {
   store: string;
 }
 
-export type Prices = Record<string, Price | null>;
+export type Prices = Partial<Record<string, Price | null>>;
 
 export interface GamesPage {
   results: Game[];

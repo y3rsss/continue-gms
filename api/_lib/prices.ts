@@ -6,6 +6,7 @@ import { rawgFetch, steamAppId, type RawgGameDetails, type RawgList, type RawgSt
 const PRICES_TTL = 12 * 60 * 60 * 1000;
 const MISSING_TTL = 7 * 24 * 60 * 60 * 1000;
 const RAWG_PARALLEL = 6;
+const LOOKUPS_PER_REQUEST = 10;
 
 export interface PriceRow {
   game_slug: string;
@@ -81,19 +82,22 @@ export async function priceRows(slugs: string[], store: PriceStore, hints: Steam
   const rows = new Map((await store.read(slugs)).map((row) => [row.game_slug, row]));
   const now = Date.now();
   const age = (row: PriceRow) => now - Date.parse(row.checked_at);
-  const unmapped = slugs.filter((slug) => {
+  const unseen = slugs.filter((slug) => !rows.has(slug));
+  const expired = slugs.filter((slug) => {
     const row = rows.get(slug);
-    return !row || (!row.itad_id && age(row) > MISSING_TTL);
+    return !!row && !row.itad_id && age(row) > MISSING_TTL;
   });
+  const lookups = [...unseen, ...expired].slice(0, LOOKUPS_PER_REQUEST);
+  const deferred = unseen.slice(LOOKUPS_PER_REQUEST);
   const stale = slugs.filter((slug) => {
     const row = rows.get(slug);
     return !!row?.itad_id && age(row) > PRICES_TTL;
   });
-  if (!unmapped.length && !stale.length) return rows;
+  if (!lookups.length && !stale.length) return { rows, deferred };
 
   let ids = new Map<string, string | null>();
   try {
-    ids = await findIds(unmapped, hints);
+    ids = await findIds(lookups, hints);
   } catch (error) {
     console.error(error);
   }
@@ -118,7 +122,7 @@ export async function priceRows(slugs: string[], store: PriceStore, hints: Steam
   } catch (error) {
     console.error(error);
   }
-  return rows;
+  return { rows, deferred };
 }
 
 export function cheapest(row: PriceRow | undefined): Price | null {

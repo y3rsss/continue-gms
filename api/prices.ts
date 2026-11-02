@@ -11,8 +11,9 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   try {
-    const rows = await priceRows(slugs, priceStore());
-    const prices: Prices = Object.fromEntries(slugs.map((slug) => [slug, cheapest(rows.get(slug))]));
+    const { rows, deferred } = await priceRows(slugs, priceStore());
+    const answered = slugs.filter((slug) => !deferred.includes(slug));
+    const prices: Prices = Object.fromEntries(answered.map((slug) => [slug, cheapest(rows.get(slug))]));
     // games that couldn't be looked up this time get another try soon
     const complete = slugs.every((slug) => rows.has(slug));
     return Response.json(prices, { headers: cacheFor(complete ? 60 * 60 : 60) });
