@@ -41,6 +41,7 @@ test.describe("on a phone", () => {
     ["cover", "/", "Valheim"],
     ["index", "/games", "Grand Theft Auto V"],
     ["game page", "/games/hollow-knight", "Hollow Knight"],
+    ["backlog", "/backlog", "Nothing here yet"],
   ]) {
     test(`the ${name} fits the screen without sideways scrolling`, async ({ page }) => {
       await page.goto(path);

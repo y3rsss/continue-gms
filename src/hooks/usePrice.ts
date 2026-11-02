@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQueries, useQuery } from "@tanstack/react-query";
 import { MAX_PRICED_GAMES, SLUG } from "@shared/limits";
 import type { Price, Prices } from "@shared/types";
 import { getJson } from "../services/api";
@@ -34,9 +34,22 @@ const loadPrice = (slug: string) =>
     timer ??= setTimeout(flush, 10);
   });
 
-export const usePrice = (slug: string) =>
-  useQuery({
+const priceQuery = (slug: string) =>
+  queryOptions({
     queryKey: ["price", slug],
     queryFn: () => loadPrice(slug),
     staleTime: 60 * 60 * 1000,
+    retryOnMount: false,
+  });
+
+export const usePrice = (slug: string) => useQuery(priceQuery(slug));
+
+export const usePrices = (slugs: string[]) =>
+  useQueries({
+    queries: slugs.map((slug) => priceQuery(slug)),
+    combine: (results) => ({
+      prices: Object.fromEntries(slugs.map((slug, i) => [slug, results[i].data])),
+      pending: results.some((result) => result.isPending),
+      failed: results.some((result) => result.isLoadingError),
+    }),
   });
