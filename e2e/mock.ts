@@ -1,7 +1,16 @@
 import { readFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
+import type { Game } from "../shared/types";
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8");
+
+const games: Game[] = JSON.parse(fixture("games")).results;
+
+export const game = (slug: string) => {
+  const found = games.find((g) => g.slug === slug);
+  if (!found) throw new Error(`No fixture game ${slug}`);
+  return found;
+};
 
 function fixtureFor(url: URL): string | null {
   switch (url.pathname) {
