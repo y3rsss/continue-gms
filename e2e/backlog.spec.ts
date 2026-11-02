@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { game, mockApi } from "./mock";
+import { game, mockApi, pricesFor } from "./mock";
 
 const stamps = {
   "grand-theft-auto-v": "want",
@@ -71,6 +71,25 @@ test("the cover shows Want to play games on sale, biggest discount first", async
   await row.getByRole("link", { name: "See all" }).click();
   await expect(page).toHaveURL(/\/backlog\?status=want&sale=1&sort=discount/);
   await expect(titles(page)).toHaveText(["Tomb Raider", "The Witcher 3: Wild Hunt"]);
+});
+
+test("the cover row waits for every price before it shows", async ({ page }) => {
+  let held = false;
+  await page.route("**/api/prices**", async (route) => {
+    const answer = pricesFor(new URL(route.request().url()));
+    if (!held && "tomb-raider" in answer) {
+      held = true;
+      delete answer["tomb-raider"];
+    } else {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify(answer) });
+  });
+  await seedBacklog(page, stamps);
+  await page.goto("/");
+  await expect(coverRow(page)).toBeVisible();
+  const row = page.locator("section", { has: coverRow(page) });
+  expect(await row.locator(".narrow").allTextContents()).toEqual(["Tomb Raider", "The Witcher 3: Wild Hunt"]);
 });
 
 test("the cover leaves the row out when nothing on Want to play is on sale", async ({ page }) => {

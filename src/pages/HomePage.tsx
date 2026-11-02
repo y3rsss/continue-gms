@@ -25,14 +25,16 @@ const teasers = [
 const HomePage = () => {
   const backlog = useBacklog();
   const wanted = Object.values(backlog).filter((e) => e.status === "want");
-  const { prices } = usePrices(wanted.map((e) => e.game.slug));
-  const deals = sortEntries(
-    wanted.filter((e) => isOnSale(prices[e.game.slug])),
-    prices,
-    "discount",
-  )
-    .slice(0, 12)
-    .map((e) => e.game);
+  const { prices, pending } = usePrices(wanted.map((e) => e.game.slug));
+  const deals = pending
+    ? []
+    : sortEntries(
+        wanted.filter((e) => isOnSale(prices[e.game.slug])),
+        prices,
+        "discount",
+      )
+        .slice(0, 12)
+        .map((e) => e.game);
   const trending = useList("trending", 13);
   const fresh = useList("new");
   const greats = useList("greats");

@@ -14,7 +14,7 @@ export const game = (slug: string) => {
 
 const prices: Prices = JSON.parse(fixture("prices"));
 
-const pricesFor = (url: URL) =>
+export const pricesFor = (url: URL) =>
   Object.fromEntries(
     (url.searchParams.get("slugs")?.split(",") ?? []).map((slug) => [slug, prices[slug] ?? null]),
   );
