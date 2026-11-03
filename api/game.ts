@@ -1,4 +1,5 @@
-import { SLUG, cacheFor, errorResponse } from "./_lib/http.js";
+import { answerWithCopy } from "./_lib/copies.js";
+import { SLUG } from "./_lib/http.js";
 import {
   rawgFetch,
   toGameDetails,
@@ -17,7 +18,7 @@ export async function GET(request: Request): Promise<Response> {
     return Response.json({ error: "Invalid game" }, { status: 400 });
   }
 
-  try {
+  return answerWithCopy(`game?slug=${slug}`, 24 * 60 * 60, async () => {
     const [game, screenshots, movies] = await Promise.all([
       rawgFetch<RawgGameDetails>(`games/${slug}`),
       rawgFetch<RawgList<RawgScreenshot>>(`games/${slug}/screenshots`, { page_size: 40 }),
@@ -34,10 +35,6 @@ export async function GET(request: Request): Promise<Response> {
         })
       : { results: [] };
 
-    return Response.json(toGameDetails(game, screenshots.results, movies.results, similar.results), {
-      headers: cacheFor(24 * 60 * 60),
-    });
-  } catch (error) {
-    return errorResponse(error);
-  }
+    return toGameDetails(game, screenshots.results, movies.results, similar.results);
+  });
 }

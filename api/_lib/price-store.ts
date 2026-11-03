@@ -1,15 +1,5 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { admin } from "./db.js";
 import type { PriceRow, PriceStore } from "./prices.js";
-
-let client: SupabaseClient | undefined;
-
-function admin() {
-  const url = process.env.VITE_SUPABASE_URL;
-  const key = process.env.SUPABASE_SECRET_KEY;
-  if (!url || !key) throw new Error("VITE_SUPABASE_URL and SUPABASE_SECRET_KEY must be set");
-  client ??= createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-  return client;
-}
 
 export const priceStore = (): PriceStore => ({
   async read(slugs) {

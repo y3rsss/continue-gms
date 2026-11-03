@@ -9,6 +9,16 @@ const storeKey = (name: string) =>
     .replace(/[^a-z]/g, "")
     .replace(/(games?)?store$/, "");
 
+export async function savedOffers(slug: string, store?: PriceStore): Promise<WhereToBuy | null> {
+  try {
+    const [row] = await (store ?? priceStore()).read([slug]);
+    return { offers: row?.offers ?? [], lowestEver: row?.lowest ?? null };
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 export async function whereToBuy(slug: string, store?: PriceStore): Promise<WhereToBuy> {
   const data = await rawgFetch<RawgList<RawgStoreLink>>(`games/${slug}/stores`);
   const links = data.results.filter((link) => link.url).map(toStoreOffer);

@@ -1,4 +1,5 @@
 import { LISTS, SORT_OPTIONS, type GamesPage, type List, type SortOption } from "../shared/types.js";
+import { answerWithCopy } from "./_lib/copies.js";
 import { cacheFor, errorResponse } from "./_lib/http.js";
 import { searchGames } from "./_lib/search.js";
 import {
@@ -26,8 +27,8 @@ export async function GET(request: Request): Promise<Response> {
 
   if (
     (genre && !SLUG.test(genre)) ||
-    (platform && !(platform in PLATFORM_IDS)) ||
-    !(sort in SORT_OPTIONS) ||
+    (platform && !Object.hasOwn(PLATFORM_IDS, platform)) ||
+    !Object.hasOwn(SORT_OPTIONS, sort) ||
     (list && !LISTS.includes(list as List)) ||
     !Number.isInteger(size) ||
     size < 1 ||
@@ -41,8 +42,8 @@ export async function GET(request: Request): Promise<Response> {
 
   const filters = { genres: genre, parent_platforms: platform ? PLATFORM_IDS[platform] : undefined };
 
-  try {
-    if (search) {
+  if (search) {
+    try {
       const matches = await searchGames(search, sort, filters);
       const start = (page - 1) * size;
       const body: GamesPage = {
@@ -51,8 +52,13 @@ export async function GET(request: Request): Promise<Response> {
         nextPage: start + size < matches.length ? page + 1 : null,
       };
       return Response.json(body, { headers: cacheFor(60 * 60) });
+    } catch (error) {
+      return errorResponse(error);
     }
+  }
 
+  const key = `games?genre=${genre ?? ""}&platform=${platform ?? ""}&sort=${sort}&list=${list ?? ""}&page=${page}&size=${size}`;
+  return answerWithCopy(key, 60 * 60, async (): Promise<GamesPage> => {
     const data = await rawgFetch<RawgList<RawgGame>>("games", {
       ...filters,
       ordering: SORT_ORDERING[sort],
@@ -60,14 +66,10 @@ export async function GET(request: Request): Promise<Response> {
       page_size: size,
       ...(list && LIST_PARAMS[list as List]()),
     });
-
-    const body: GamesPage = {
+    return {
       results: data.results.map(toGame),
       count: data.count,
       nextPage: data.next ? page + 1 : null,
     };
-    return Response.json(body, { headers: cacheFor(60 * 60) });
-  } catch (error) {
-    return errorResponse(error);
-  }
+  });
 }

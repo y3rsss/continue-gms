@@ -8,6 +8,24 @@ export type Database = {
   };
   public: {
     Tables: {
+      api_copies: {
+        Row: {
+          body: Json;
+          key: string;
+          saved_at: string;
+        };
+        Insert: {
+          body: Json;
+          key: string;
+          saved_at?: string;
+        };
+        Update: {
+          body?: Json;
+          key?: string;
+          saved_at?: string;
+        };
+        Relationships: [];
+      };
       backlog_entries: {
         Row: {
           game: Json;
@@ -97,6 +115,10 @@ export type Database = {
     };
     Functions: {
       delete_account: { Args: never; Returns: undefined };
+      save_api_copy: {
+        Args: { copy_body: Json; copy_key: string };
+        Returns: undefined;
+      };
       username_available: { Args: { name: string }; Returns: boolean };
     };
     Enums: {
