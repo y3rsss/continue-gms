@@ -6,10 +6,11 @@ import GameCard, { GameCardSkeleton } from "./GameCard";
 interface Props {
   title: string;
   games: Game[] | undefined;
+  error?: Error | null;
   more?: string;
 }
 
-const Rail = ({ title, games, more }: Props) => {
+const Rail = ({ title, games, error, more }: Props) => {
   return (
     <section className="grid gap-3.5">
       <div className="flex items-baseline justify-between gap-4 border-t-[3px] border-ink pt-2.5">
@@ -26,11 +27,15 @@ const Rail = ({ title, games, more }: Props) => {
           </Link>
         )}
       </div>
-      <div className="-mx-4 grid auto-cols-[72%] grid-flow-col gap-4 overflow-x-auto px-4 pb-1.5 [scrollbar-width:thin] sm:mx-0 sm:auto-cols-[210px] sm:px-0">
-        {games
-          ? games.map((game) => <GameCard key={game.id} game={game} />)
-          : Array.from({ length: 5 }, (_, i) => <GameCardSkeleton key={i} />)}
-      </div>
+      {!games && error ? (
+        <p className="py-6 font-body text-faded">{error.message}. Try again in a moment.</p>
+      ) : (
+        <div className="-mx-4 grid auto-cols-[72%] grid-flow-col gap-4 overflow-x-auto px-4 pb-1.5 [scrollbar-width:thin] sm:mx-0 sm:auto-cols-[210px] sm:px-0">
+          {games
+            ? games.map((game) => <GameCard key={game.id} game={game} />)
+            : Array.from({ length: 5 }, (_, i) => <GameCardSkeleton key={i} />)}
+        </div>
+      )}
     </section>
   );
 };

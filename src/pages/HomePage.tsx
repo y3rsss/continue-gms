@@ -66,7 +66,7 @@ const HomePage = () => {
               {count(total.data.count)} video games
             </span>
           ) : (
-            <span className="h-8 w-40 animate-pulse bg-tint" />
+            !total.isError && <span className="h-8 w-40 animate-pulse bg-tint" />
           )}
         </div>
 
@@ -100,7 +100,9 @@ const HomePage = () => {
               </div>
             </Link>
           ) : (
-            <div className="aspect-[3/4] animate-pulse bg-tint sm:aspect-[4/3] md:aspect-[21/9]" />
+            !trending.isError && (
+              <div className="aspect-[3/4] animate-pulse bg-tint sm:aspect-[4/3] md:aspect-[21/9]" />
+            )
           )}
         </div>
 
@@ -127,9 +129,19 @@ const HomePage = () => {
         <Rail title="Want to play, on sale" games={deals} more="/backlog?status=want&sale=1&sort=discount" />
       )}
 
-      <Rail title="Trending now" games={trending.data?.results.slice(1)} more="/games?sort=added" />
-      <Rail title="New and notable" games={fresh.data?.results} />
-      <Rail title="All-time greats" games={greats.data?.results} more="/games?sort=metascore" />
+      <Rail
+        title="Trending now"
+        games={trending.data?.results.slice(1)}
+        error={trending.error}
+        more="/games?sort=added"
+      />
+      <Rail title="New and notable" games={fresh.data?.results} error={fresh.error} />
+      <Rail
+        title="All-time greats"
+        games={greats.data?.results}
+        error={greats.error}
+        more="/games?sort=metascore"
+      />
     </div>
   );
 };

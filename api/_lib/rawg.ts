@@ -8,7 +8,7 @@ import type {
   SortOption,
   StoreOffer,
 } from "../../shared/types.js";
-import { UpstreamError } from "./http.js";
+import { upstreamJson } from "./http.js";
 
 const BASE_URL = "https://api.rawg.io/api/";
 
@@ -24,10 +24,7 @@ export async function rawgFetch<T>(
     if (value !== undefined && value !== "") url.searchParams.set(name, String(value));
   }
   url.searchParams.set("key", key);
-
-  const response = await fetch(url);
-  if (!response.ok) throw new UpstreamError("RAWG", response.status);
-  return response.json() as Promise<T>;
+  return upstreamJson<T>("RAWG", url);
 }
 
 export const PLATFORM_IDS: Record<string, number> = {

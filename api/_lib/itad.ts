@@ -1,5 +1,5 @@
 import type { LowestEver, StoreOffer } from "../../shared/types.js";
-import { UpstreamError } from "./http.js";
+import { upstreamJson } from "./http.js";
 
 const BASE_URL = "https://api.isthereanydeal.com/";
 const STEAM_SHOP = 61;
@@ -33,13 +33,11 @@ async function itadFetch<T>(path: string, body: unknown): Promise<T> {
   const key = process.env.ITAD_API_KEY;
   if (!key) throw new Error("ITAD_API_KEY is not set");
 
-  const response = await fetch(new URL(path, BASE_URL), {
+  return upstreamJson<T>("IsThereAnyDeal", new URL(path, BASE_URL), {
     method: "POST",
     headers: { "ITAD-API-Key": key, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!response.ok) throw new UpstreamError("IsThereAnyDeal", response.status);
-  return response.json() as Promise<T>;
 }
 
 export async function idsBySteamApp(appIds: string[]): Promise<Map<string, string | null>> {

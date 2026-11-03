@@ -15,6 +15,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -61,6 +62,25 @@ describe("responses", () => {
 
   it("returns 502 when RAWG itself fails", async () => {
     fakeFetch(() => new Response("oops", { status: 500 }));
+    expect((await call(games, "/api/games")).status).toBe(502);
+  });
+
+  it("returns 502 when RAWG doesn't answer within 8 seconds", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      (_: URL, init: RequestInit) =>
+        new Promise((_resolve, reject) =>
+          init.signal?.addEventListener("abort", () => reject(init.signal?.reason)),
+        ),
+    );
+    const response = call(games, "/api/games");
+    await vi.advanceTimersByTimeAsync(8000);
+    expect((await response).status).toBe(502);
+  });
+
+  it("returns 502 when RAWG can't be reached", async () => {
+    vi.stubGlobal("fetch", () => Promise.reject(new TypeError("fetch failed")));
     expect((await call(games, "/api/games")).status).toBe(502);
   });
 

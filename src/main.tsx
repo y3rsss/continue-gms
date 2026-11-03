@@ -13,8 +13,10 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
-      // asking again won't change a 4xx like "game not found"
-      retry: (failures, error) => !(error instanceof ApiError && error.status < 500) && failures < 3,
+      retry: (failures, error) => {
+        if (!(error instanceof ApiError)) return failures < 3;
+        return error.status >= 500 && failures < 1;
+      },
     },
   },
 });

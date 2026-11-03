@@ -34,6 +34,43 @@ test("an unknown game says it can't be found", async ({ page }) => {
   await expect(page.getByText(/couldn't find that game/)).toBeVisible();
 });
 
+test("a provider failure is asked again once, then says so", async ({ page }) => {
+  let asked = 0;
+  await page.route("**/api/game?slug=hollow-knight", (route) => {
+    asked++;
+    return route.fulfill({
+      status: 502,
+      contentType: "application/json",
+      body: '{"error":"Game data provider failed"}',
+    });
+  });
+  await page.goto("/games/hollow-knight");
+  await expect(page.getByText("Game data provider failed. Try again in a moment.")).toBeVisible();
+  expect(asked).toBe(2);
+});
+
+test("a cover list that fails says so instead of loading forever", async ({ page }) => {
+  await page.route(
+    (url) => url.pathname === "/api/games" && url.searchParams.get("list") === "new",
+    (route) =>
+      route.fulfill({
+        status: 502,
+        contentType: "application/json",
+        body: '{"error":"Game data provider failed"}',
+      }),
+  );
+  await page.goto("/");
+  const fresh = page.locator("section", { has: page.getByRole("heading", { name: "New and notable" }) });
+  await expect(fresh.getByText("Game data provider failed. Try again in a moment.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Trending now" })).toBeVisible();
+  await expect(
+    page
+      .locator("section", { has: page.getByRole("heading", { name: "Trending now" }) })
+      .locator(".narrow")
+      .first(),
+  ).toBeVisible();
+});
+
 test.describe("on a phone", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
