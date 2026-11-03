@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mockApi } from "./mock";
+import { game, mockApi } from "./mock";
 
 test.beforeEach(async ({ page }) => {
   await mockApi(page);
@@ -69,6 +69,46 @@ test("a cover list that fails says so instead of loading forever", async ({ page
       .locator(".narrow")
       .first(),
   ).toBeVisible();
+});
+
+test.describe("a game in the backlog", () => {
+  const witcher = game("the-witcher-3-wild-hunt");
+
+  test.beforeEach(async ({ page }) => {
+    const backlog = { [witcher.slug]: { status: "want", game: witcher, updatedAt: 1 } };
+    await page.addInitScript(
+      (data) => localStorage.setItem("continue.backlog", data),
+      JSON.stringify(backlog),
+    );
+  });
+
+  test("still opens with what the backlog saved when details fail", async ({ page }) => {
+    await page.route(`**/api/game?slug=${witcher.slug}`, (route) =>
+      route.fulfill({
+        status: 502,
+        contentType: "application/json",
+        body: '{"error":"Game data provider failed"}',
+      }),
+    );
+    await page.goto(`/games/${witcher.slug}`);
+    await expect(page.getByRole("status").filter({ hasText: "Showing what your backlog saved" })).toHaveText(
+      "Couldn't load the full page. Showing what your backlog saved.",
+    );
+    await expect(page.getByRole("heading", { name: witcher.name })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Want to play", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(page).toHaveTitle(`${witcher.name} | Continue?`);
+  });
+
+  test("still says it can't be found when RAWG doesn't know it", async ({ page }) => {
+    await page.route(`**/api/game?slug=${witcher.slug}`, (route) =>
+      route.fulfill({ status: 404, contentType: "application/json", body: '{"error":"Game not found"}' }),
+    );
+    await page.goto(`/games/${witcher.slug}`);
+    await expect(page.getByText(/couldn't find that game/)).toBeVisible();
+  });
 });
 
 test.describe("on a phone", () => {

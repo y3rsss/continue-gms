@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useParams } from "react-router";
-import { Maximize2 } from "lucide-react";
+import { CloudOff, Maximize2 } from "lucide-react";
+import type { Game, GameDetails } from "@shared/types";
 import { fullDate } from "@/lib/format";
 import { rememberGame } from "@/lib/recent";
 import { cn } from "@/lib/utils";
@@ -14,30 +15,45 @@ import Meta from "../components/Meta";
 import Score from "../components/Score";
 import ScoreStamp from "../components/ScoreStamp";
 import StoreLinks from "../components/StoreLinks";
+import { useBacklog } from "../hooks/useBacklog";
 import useGame from "../hooks/useGame";
 import useSpot from "../hooks/useSpot";
 import useStores from "../hooks/useStores";
 
+const fromBacklog = (game: Game): GameDetails => ({
+  ...game,
+  hero: game.image,
+  description: "",
+  developers: [],
+  publishers: [],
+  website: null,
+  media: [],
+  similar: [],
+});
+
 const GameView = ({ slug }: { slug: string | undefined }) => {
-  const { data: game, error, isPending } = useGame(slug);
+  const { data, error, failureReason } = useGame(slug);
+  const saved = useBacklog()[slug ?? ""]?.game;
+  const notFound = failureReason instanceof ApiError && failureReason.status === 404;
+  const game = data ?? (failureReason && !notFound && saved ? fromBacklog(saved) : undefined);
   const stores = useStores(slug);
   const spot = useSpot(game?.image).data;
   const [expanded, setExpanded] = useState(false);
   const [viewing, setViewing] = useState<number | null>(null);
 
   useEffect(() => {
-    if (game) rememberGame(game);
-  }, [game]);
+    if (data) rememberGame(data);
+  }, [data]);
 
-  if (error) {
-    return error instanceof ApiError && error.status === 404 ? (
+  if (!game && error) {
+    return notFound ? (
       <GameOver message="We couldn't find that game. It may have been renamed or removed." />
     ) : (
       <GameOver message={`${error.message}. Try again in a moment.`} />
     );
   }
 
-  if (isPending) {
+  if (!game) {
     return (
       <div className="grid gap-8 px-4 py-7 sm:px-7 lg:grid-cols-[1.25fr_1fr]">
         <div className="aspect-[3/2] animate-pulse bg-tint" />
@@ -59,6 +75,7 @@ const GameView = ({ slug }: { slug: string | undefined }) => {
     ["Platforms", game.platforms.map((p) => p.name).join(", ")],
   ].filter(([, value]) => value);
   const heroIndex = game.media.findIndex((item) => item.kind === "image");
+  const hasMore = paragraphs.length > 0 || game.media.length > 0 || game.similar.length > 0;
 
   return (
     <article
@@ -66,7 +83,21 @@ const GameView = ({ slug }: { slug: string | undefined }) => {
       className="spot-scope [transition:--spot_.5s_ease]"
     >
       <title>{`${game.name} | Continue?`}</title>
-      <section className="grid gap-8 border-b-[3px] border-ink bg-[radial-gradient(80%_120%_at_0%_0%,color-mix(in_oklab,var(--spot)_22%,transparent),transparent_65%)] px-4 py-7 sm:px-7 lg:grid-cols-[1.25fr_1fr]">
+      {!data && (
+        <p
+          role="status"
+          className="flex items-center gap-2 border-b-[1.5px] border-ink bg-tint px-4 py-2.5 font-body text-sm sm:px-7"
+        >
+          <CloudOff className="size-4 shrink-0" strokeWidth={2.5} />
+          Couldn't load the full page. Showing what your backlog saved.
+        </p>
+      )}
+      <section
+        className={cn(
+          "grid gap-8 bg-[radial-gradient(80%_120%_at_0%_0%,color-mix(in_oklab,var(--spot)_22%,transparent),transparent_65%)] px-4 py-7 sm:px-7 lg:grid-cols-[1.25fr_1fr]",
+          hasMore && "border-b-[3px] border-ink",
+        )}
+      >
         <button
           type="button"
           aria-label={`Open ${game.name} screenshots`}
@@ -141,73 +172,75 @@ const GameView = ({ slug }: { slug: string | undefined }) => {
         </div>
       </section>
 
-      <section className="grid gap-8 px-4 pt-6 pb-12 sm:px-7 lg:grid-cols-[1.25fr_1fr]">
-        <div className="grid min-w-0 content-start gap-5">
-          {paragraphs.length > 0 && (
-            <div className="grid justify-items-start gap-2">
-              <div
-                className={cn(
-                  "grid max-w-[62ch] gap-3 font-body text-base leading-relaxed",
-                  !expanded && "line-clamp-[8]",
-                )}
-              >
-                {paragraphs.map((p, i) => (
-                  <p
-                    key={i}
-                    className={cn(
-                      i === 0 &&
-                        "first-letter:wide first-letter:float-left first-letter:mt-1 first-letter:mr-2 first-letter:font-sans first-letter:text-[3.1em] first-letter:leading-[0.82] first-letter:font-black first-letter:text-spot-text",
-                    )}
+      {hasMore && (
+        <section className="grid gap-8 px-4 pt-6 pb-12 sm:px-7 lg:grid-cols-[1.25fr_1fr]">
+          <div className="grid min-w-0 content-start gap-5">
+            {paragraphs.length > 0 && (
+              <div className="grid justify-items-start gap-2">
+                <div
+                  className={cn(
+                    "grid max-w-[62ch] gap-3 font-body text-base leading-relaxed",
+                    !expanded && "line-clamp-[8]",
+                  )}
+                >
+                  {paragraphs.map((p, i) => (
+                    <p
+                      key={i}
+                      className={cn(
+                        i === 0 &&
+                          "first-letter:wide first-letter:float-left first-letter:mt-1 first-letter:mr-2 first-letter:font-sans first-letter:text-[3.1em] first-letter:leading-[0.82] first-letter:font-black first-letter:text-spot-text",
+                      )}
+                    >
+                      {p}
+                    </p>
+                  ))}
+                </div>
+                {paragraphs.join(" ").length > 600 && (
+                  <button
+                    type="button"
+                    onClick={() => setExpanded(!expanded)}
+                    className="label text-spot-text hover:underline"
                   >
-                    {p}
-                  </p>
+                    {expanded ? "Show less" : "Read more"}
+                  </button>
+                )}
+              </div>
+            )}
+            <MediaGrid media={game.media} title={game.name} skip={heroIndex} onOpen={setViewing} />
+          </div>
+
+          {game.similar.length > 0 && (
+            <aside className="grid content-start gap-3">
+              <div className="flex items-baseline justify-between border-t-[3px] border-spot pt-2">
+                <h2 className="wide text-lg font-black tracking-[-0.02em] uppercase">
+                  If you like {game.name}
+                </h2>
+              </div>
+              <div className="grid">
+                {game.similar.map((other) => (
+                  <Link
+                    key={other.id}
+                    to={`/games/${other.slug}`}
+                    className="group grid grid-cols-[76px_minmax(0,1fr)_auto] items-center gap-3 border-t-[1.5px] border-ink py-2"
+                  >
+                    <Cover src={other.image} alt="" />
+                    <span className="min-w-0">
+                      <b className="narrow block text-[17px] leading-[1.05] font-extrabold uppercase group-hover:text-spot-text">
+                        {other.name}
+                      </b>
+                      <Meta
+                        items={[other.released?.slice(0, 4), other.genres[0]?.name]}
+                        className="mt-1 text-[10px]"
+                      />
+                    </span>
+                    <Score value={other.metascore} />
+                  </Link>
                 ))}
               </div>
-              {paragraphs.join(" ").length > 600 && (
-                <button
-                  type="button"
-                  onClick={() => setExpanded(!expanded)}
-                  className="label text-spot-text hover:underline"
-                >
-                  {expanded ? "Show less" : "Read more"}
-                </button>
-              )}
-            </div>
+            </aside>
           )}
-          <MediaGrid media={game.media} title={game.name} skip={heroIndex} onOpen={setViewing} />
-        </div>
-
-        {game.similar.length > 0 && (
-          <aside className="grid content-start gap-3">
-            <div className="flex items-baseline justify-between border-t-[3px] border-spot pt-2">
-              <h2 className="wide text-lg font-black tracking-[-0.02em] uppercase">
-                If you like {game.name}
-              </h2>
-            </div>
-            <div className="grid">
-              {game.similar.map((other) => (
-                <Link
-                  key={other.id}
-                  to={`/games/${other.slug}`}
-                  className="group grid grid-cols-[76px_minmax(0,1fr)_auto] items-center gap-3 border-t-[1.5px] border-ink py-2"
-                >
-                  <Cover src={other.image} alt="" />
-                  <span className="min-w-0">
-                    <b className="narrow block text-[17px] leading-[1.05] font-extrabold uppercase group-hover:text-spot-text">
-                      {other.name}
-                    </b>
-                    <Meta
-                      items={[other.released?.slice(0, 4), other.genres[0]?.name]}
-                      className="mt-1 text-[10px]"
-                    />
-                  </span>
-                  <Score value={other.metascore} />
-                </Link>
-              ))}
-            </div>
-          </aside>
-        )}
-      </section>
+        </section>
+      )}
       <Gallery
         media={game.media}
         index={viewing}
