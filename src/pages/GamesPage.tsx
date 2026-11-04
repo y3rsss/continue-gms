@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { SORT_OPTIONS, type SortOption } from "@shared/types";
 import { count } from "@/lib/format";
 import FilterMenu from "../components/FilterMenu";
+import PriceStoresMenu from "../components/PriceStoresMenu";
 import GameResults, { type View } from "../components/GameResults";
 import GenreTabs from "../components/GenreTabs";
 import Tab from "../components/Tab";
@@ -61,6 +62,7 @@ const GamesPage = () => {
           value={query.sort}
           onChange={(value) => setQuery({ sort: value as SortOption | undefined })}
         />
+        <PriceStoresMenu />
         {query.search && (
           <Tab onClick={() => setQuery({ search: undefined })}>
             Clear search

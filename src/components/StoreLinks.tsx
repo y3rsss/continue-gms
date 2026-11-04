@@ -2,7 +2,9 @@ import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import type { StoreOffer, WhereToBuy } from "@shared/types";
 import { discount, money, monthYear, priceLabel } from "@/lib/format";
+import { inStores } from "@/lib/sale";
 import { cn } from "@/lib/utils";
+import { usePriceStores } from "../hooks/usePriceStores";
 
 const VISIBLE = 5;
 
@@ -33,6 +35,7 @@ interface Props {
 
 const StoreLinks = ({ data, loading }: Props) => {
   const [expanded, setExpanded] = useState(false);
+  const stores = usePriceStores();
 
   if (loading) {
     return (
@@ -50,7 +53,8 @@ const StoreLinks = ({ data, loading }: Props) => {
   if (!data?.offers.length) return null;
 
   const { offers, lowestEver } = data;
-  const best = offers.find((offer) => offer.price !== null);
+  const priced = offers.some((offer) => offer.price !== null);
+  const best = offers.find((offer) => offer.price !== null && inStores(stores)(offer));
   const collapsible = offers.length > VISIBLE + 1;
   const shown = collapsible && !expanded ? offers.slice(0, VISIBLE) : offers;
   const atLowest = best?.price != null && lowestEver !== null && best.price <= lowestEver.price;
@@ -59,7 +63,7 @@ const StoreLinks = ({ data, loading }: Props) => {
     <div className="grid gap-2">
       <div className="flex items-baseline justify-between gap-3">
         <span className="label text-faded">Where to buy</span>
-        {best && <span className="label text-[10px] text-faded">PC prices in USD</span>}
+        {priced && <span className="label text-[10px] text-faded">PC prices in USD</span>}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {shown.map((offer) => (

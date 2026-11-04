@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { Price } from "@shared/types";
 import type { BacklogEntry } from "../hooks/useBacklog";
-import { isOnSale, sortEntries } from "./sale";
+import { bestPrice, isOnSale, parseStores, sortEntries } from "./sale";
 
-const price = (amount: number, regular: number): Price => ({ amount, regular, store: "Steam" });
+const price = (amount: number, regular: number): Price => ({ amount, regular, shopId: 61 });
 
 const entry = (slug: string): BacklogEntry => ({
   status: "want",
@@ -77,5 +77,33 @@ describe("sortEntries", () => {
     const before = slugs(entries);
     sortEntries(entries, prices, "price");
     expect(slugs(entries)).toEqual(before);
+  });
+});
+
+describe("bestPrice", () => {
+  const gog: Price = { amount: 9.99, regular: 14.99, shopId: 35 };
+  const steam: Price = { amount: 14.99, regular: 14.99, shopId: 61 };
+  const old: Price = { amount: 4.99, regular: 14.99, shopId: null };
+
+  it("takes the cheapest price when no store is picked", () => {
+    expect(bestPrice([old, gog, steam], [])).toBe(old);
+  });
+
+  it("takes the cheapest price from the picked stores", () => {
+    expect(bestPrice([old, gog, steam], [61, 16])).toBe(steam);
+    expect(bestPrice([old, gog, steam], [16])).toBeNull();
+  });
+});
+
+describe("parseStores", () => {
+  it("reads saved shop ids once each, in order", () => {
+    expect(parseStores("[61, 35, 61]")).toEqual([35, 61]);
+  });
+
+  it("drops anything that isn't a shop id", () => {
+    expect(parseStores('[61, "Steam", 1.5, -3, 0, null]')).toEqual([61]);
+    expect(parseStores('{"61": true}')).toEqual([]);
+    expect(parseStores("not json")).toEqual([]);
+    expect(parseStores(null)).toEqual([]);
   });
 });

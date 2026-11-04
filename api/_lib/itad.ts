@@ -1,4 +1,4 @@
-import type { LowestEver, StoreOffer } from "../../shared/types.js";
+import type { LowestEver, Shop, StoreOffer } from "../../shared/types.js";
 import { upstreamJson } from "./http.js";
 
 const BASE_URL = "https://api.isthereanydeal.com/";
@@ -20,6 +20,12 @@ interface ItadPrices {
   deals: ItadDeal[];
 }
 
+interface ItadShop {
+  id: number;
+  title: string;
+  games: number;
+}
+
 interface ItadOverview {
   prices: { id: string; lowest: { price: Amount; timestamp: string } | null }[];
 }
@@ -29,15 +35,25 @@ export interface Deals {
   lowestEver: LowestEver | null;
 }
 
-async function itadFetch<T>(path: string, body: unknown): Promise<T> {
+async function itadFetch<T>(path: string, body?: unknown): Promise<T> {
   const key = process.env.ITAD_API_KEY;
   if (!key) throw new Error("ITAD_API_KEY is not set");
 
-  return upstreamJson<T>("IsThereAnyDeal", new URL(path, BASE_URL), {
+  const url = new URL(path, BASE_URL);
+  if (body === undefined) return upstreamJson<T>("IsThereAnyDeal", url, { headers: { "ITAD-API-Key": key } });
+  return upstreamJson<T>("IsThereAnyDeal", url, {
     method: "POST",
     headers: { "ITAD-API-Key": key, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+}
+
+export async function shops(): Promise<Shop[]> {
+  const list = await itadFetch<ItadShop[]>("service/shops/v1?country=US");
+  return list
+    .filter((shop) => shop.games > 0)
+    .sort((a, b) => b.games - a.games)
+    .map((shop) => ({ id: shop.id, name: shop.title }));
 }
 
 export async function idsBySteamApp(appIds: string[]): Promise<Map<string, string | null>> {
@@ -57,6 +73,7 @@ export async function idsByTitle(titles: string[]): Promise<Map<string, string |
 
 const toOffer = (deal: ItadDeal): StoreOffer => ({
   store: deal.shop.name,
+  shopId: deal.shop.id,
   url: deal.url,
   price: deal.price.amount,
   regularPrice: deal.regular.amount,

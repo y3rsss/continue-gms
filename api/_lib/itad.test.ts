@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fakeFetch } from "./fake-fetch.js";
 import { deal } from "./fake-prices.js";
 import { UpstreamError } from "./http.js";
-import { dealsFor, idsBySteamApp, idsByTitle } from "./itad.js";
+import { dealsFor, idsBySteamApp, idsByTitle, shops } from "./itad.js";
 
 const answerDeals = (games: { id: string; deals: ReturnType<typeof deal>[] }[]) =>
   fakeFetch((url) =>
@@ -55,11 +55,12 @@ describe("dealsFor", () => {
       offers: [
         {
           store: "Epic Game Store",
+          shopId: 16,
           url: "https://itad.link/epic-game-store",
           price: 9.99,
           regularPrice: 14.99,
         },
-        { store: "Steam", url: "https://itad.link/steam", price: 14.99, regularPrice: 14.99 },
+        { store: "Steam", shopId: 61, url: "https://itad.link/steam", price: 14.99, regularPrice: 14.99 },
       ],
       lowestEver: { price: 2.99, date: "2024-04-11" },
     });
@@ -73,5 +74,24 @@ describe("dealsFor", () => {
   it("fails loudly when the api refuses", async () => {
     fakeFetch(() => new Response("slow down", { status: 429 }));
     await expect(dealsFor(["hk"])).rejects.toBeInstanceOf(UpstreamError);
+  });
+});
+
+describe("shops", () => {
+  it("lists the shops that sell games, biggest catalog first", async () => {
+    const fetch = fakeFetch((url, init) => {
+      expect(url.pathname).toBe("/service/shops/v1");
+      expect(init?.method).toBeUndefined();
+      return [
+        { id: 1, title: "GOG", games: 12831 },
+        { id: 2, title: "Muve", games: 0 },
+        { id: 3, title: "Steam", games: 328305 },
+      ];
+    });
+    expect(await shops()).toEqual([
+      { id: 3, name: "Steam" },
+      { id: 1, name: "GOG" },
+    ]);
+    expect(fetch.mock.calls[0][1]?.headers).toMatchObject({ "ITAD-API-Key": "itad-key" });
   });
 });

@@ -2,8 +2,10 @@ import { vi } from "vitest";
 import { fakeFetch } from "./fake-fetch.js";
 import type { PriceRow, PriceStore } from "./prices.js";
 
-export const deal = (shop: string, price: number, regular: number) => ({
-  shop: { id: 1, name: shop },
+const SHOP_IDS = { Steam: 61, GOG: 35, "Epic Game Store": 16 } as const;
+
+export const deal = (shop: keyof typeof SHOP_IDS, price: number, regular: number) => ({
+  shop: { id: SHOP_IDS[shop], name: shop },
   price: { amount: price },
   regular: { amount: regular },
   url: `https://itad.link/${shop.toLowerCase().replace(/ /g, "-")}`,

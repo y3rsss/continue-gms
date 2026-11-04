@@ -41,6 +41,15 @@ test("On sale keeps the status and sorts by biggest discount", async ({ page }) 
   await expect(page).toHaveURL(/sort=discount/);
 });
 
+test("On sale only counts the stores you pick", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("continue.stores", JSON.stringify([61])));
+  await seedBacklog(page, stamps);
+  await page.goto("/backlog?status=want");
+  await expect(page.getByRole("button", { name: "Prices from Steam" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "On sale 0", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Grand Theft Auto V/ })).toContainText("$29.99");
+});
+
 test("a free game doesn't count as on sale", async ({ page }) => {
   await seedBacklog(page, stamps);
   await page.goto("/backlog?status=playing&sale=1");
@@ -77,9 +86,9 @@ test("the cover row waits for every price before it shows", async ({ page }) => 
   let held = false;
   await page.route("**/api/prices**", async (route) => {
     const answer = pricesFor(new URL(route.request().url()));
-    if (!held && "tomb-raider" in answer) {
+    if (!held && "tomb-raider" in answer.prices) {
       held = true;
-      delete answer["tomb-raider"];
+      delete answer.prices["tomb-raider"];
     } else {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }

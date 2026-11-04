@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET as prices } from "../prices.js";
 import { calledUrls, fakePriceApis, hoursAgo, memoryStore } from "./fake-prices.js";
-import { cheapest, priceRows, type PriceRow } from "./prices.js";
+import { priceRows, storePrices, type PriceRow } from "./prices.js";
 
 vi.mock("./price-store.js", async () => {
   const { memoryStore } = await import("./fake-prices.js");
@@ -12,7 +12,7 @@ const row = (game_slug: string, itad_id: string | null, checked_at: string): Pri
   game_slug,
   itad_id,
   offers: itad_id
-    ? [{ store: "Steam", url: "https://itad.link/old", price: 19.99, regularPrice: 19.99 }]
+    ? [{ store: "Steam", shopId: 61, url: "https://itad.link/old", price: 19.99, regularPrice: 19.99 }]
     : [],
   lowest: null,
   checked_at,
@@ -57,6 +57,15 @@ describe("priceRows", () => {
     const fetch = fakePriceApis();
     const store = memoryStore([row("hollow-knight", "hk", hoursAgo(13))]);
     expect((await priceRows(["hollow-knight"], store)).rows.get("hollow-knight")?.offers[0].price).toBe(9.99);
+    expect(calledUrls(fetch).some((url) => url.startsWith("api.rawg.io"))).toBe(false);
+  });
+
+  it("refreshes prices saved before shop ids were stored, without asking RAWG", async () => {
+    const fetch = fakePriceApis();
+    const old = { store: "Steam", url: "https://itad.link/old", price: 19.99, regularPrice: 19.99 };
+    const store = memoryStore([{ ...row("hollow-knight", "hk", hoursAgo(1)), offers: [old] }]);
+    const { rows } = await priceRows(["hollow-knight"], store);
+    expect(rows.get("hollow-knight")?.offers.map((offer) => offer.shopId)).toEqual([35, 61]);
     expect(calledUrls(fetch).some((url) => url.startsWith("api.rawg.io"))).toBe(false);
   });
 
@@ -141,13 +150,14 @@ describe("priceRows", () => {
 
 describe("/api/prices", () => {
   const call = (slugs: string) => prices(new Request(`http://localhost/api/prices?slugs=${slugs}`));
+  const gog = { amount: 9.99, regular: 14.99, shopId: 35 };
+  const steam = { amount: 14.99, regular: 14.99, shopId: 61 };
 
-  it("answers each game with its cheapest offer and caches it for an hour", async () => {
+  it("answers each game with its price at every store, cheapest first, cached for an hour", async () => {
     fakePriceApis();
     const response = await call("hollow-knight,ghost-of-yotei");
     expect(await response.json()).toEqual({
-      "hollow-knight": { amount: 9.99, regular: 14.99, store: "GOG" },
-      "ghost-of-yotei": null,
+      prices: { "hollow-knight": [gog, steam], "ghost-of-yotei": [] },
     });
     expect(response.headers.get("Cache-Control")).toContain("s-maxage=3600");
   });
@@ -155,7 +165,7 @@ describe("/api/prices", () => {
   it("caches briefly when a game couldn't be looked up, so it's tried again soon", async () => {
     fakePriceApis();
     const response = await call("hollow-knight,no-such-game");
-    expect(await response.json()).toMatchObject({ "no-such-game": null });
+    expect(await response.json()).toMatchObject({ prices: { "no-such-game": [] } });
     expect(response.headers.get("Cache-Control")).toContain("s-maxage=60,");
   });
 
@@ -163,24 +173,21 @@ describe("/api/prices", () => {
     fakePriceApis();
     const response = await call(["hollow-knight", ...newGames(10)].join(","));
     expect(await response.json()).toEqual({
-      "hollow-knight": { amount: 9.99, regular: 14.99, store: "GOG" },
-      ...Object.fromEntries(newGames(9).map((slug) => [slug, null])),
+      prices: { "hollow-knight": [gog, steam], ...Object.fromEntries(newGames(9).map((slug) => [slug, []])) },
     });
     expect(response.headers.get("Cache-Control")).toContain("s-maxage=60,");
   });
 });
 
-describe("cheapest", () => {
-  it("picks the first offer", () => {
-    expect(cheapest(row("hollow-knight", "hk", hoursAgo(1)))).toEqual({
-      amount: 19.99,
-      regular: 19.99,
-      store: "Steam",
-    });
+describe("storePrices", () => {
+  it("lists each store's price with its shop id", () => {
+    expect(storePrices(row("hollow-knight", "hk", hoursAgo(1)))).toEqual([
+      { amount: 19.99, regular: 19.99, shopId: 61 },
+    ]);
   });
 
-  it("is null without offers", () => {
-    expect(cheapest(row("ghost-of-yotei", null, hoursAgo(1)))).toBeNull();
-    expect(cheapest(undefined)).toBeNull();
+  it("is empty without offers", () => {
+    expect(storePrices(row("ghost-of-yotei", null, hoursAgo(1)))).toEqual([]);
+    expect(storePrices(undefined)).toEqual([]);
   });
 });

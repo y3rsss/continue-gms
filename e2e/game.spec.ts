@@ -13,6 +13,17 @@ test("shows where to buy with prices and the record low", async ({ page }) => {
   await expect(page.getByRole("button", { name: /Show all 7 stores/ })).toBeVisible();
 });
 
+test("where to buy marks the cheapest offer at the stores you pick", async ({ page }) => {
+  const gog = page.getByRole("link", { name: /GOG/ });
+  const steam = page.getByRole("link", { name: /Steam\s*\$14\.99/ });
+  await expect(gog).toHaveClass(/bg-ink/);
+  await page.evaluate(() => localStorage.setItem("continue.stores", "[61]"));
+  await page.reload();
+  await expect(steam).toHaveClass(/bg-ink/);
+  await expect(gog).not.toHaveClass(/bg-ink/);
+  await expect(page.getByText("PC prices in USD")).toBeVisible();
+});
+
 test("a backlog stamp shows up on My backlog", async ({ page }) => {
   const playing = page.getByRole("button", { name: "Playing", exact: true });
   await playing.click();

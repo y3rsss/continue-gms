@@ -1,10 +1,12 @@
 import { queryOptions, useQueries, useQuery } from "@tanstack/react-query";
 import { MAX_PRICED_GAMES, SLUG } from "@shared/limits";
-import type { Price, Prices } from "@shared/types";
+import type { Price, PricesAnswer } from "@shared/types";
+import { bestPrice } from "@/lib/sale";
 import { getJson } from "../services/api";
+import { usePriceStores } from "./usePriceStores";
 
 interface Waiter {
-  resolve: (price: Price | null) => void;
+  resolve: (prices: Price[]) => void;
   reject: (error: unknown) => void;
 }
 
@@ -25,12 +27,12 @@ function flush() {
     const chunk = slugs.slice(i, i + MAX_PRICED_GAMES);
     const settle = (each: (waiter: Waiter, slug: string) => void) =>
       chunk.forEach((slug) => batch.get(slug)!.forEach((waiter) => each(waiter, slug)));
-    getJson<Prices>("/api/prices", { slugs: chunk.join(",") })
-      .then((prices) => {
+    getJson<PricesAnswer>("/api/prices", { slugs: chunk.join(",") })
+      .then(({ prices }) => {
         const answered = (slug: string) => Object.hasOwn(prices, slug);
         if (!chunk.some(answered)) throw new Error("No prices came back");
         settle((waiter, slug) =>
-          answered(slug) ? waiter.resolve(prices[slug] ?? null) : enqueue(slug, waiter),
+          answered(slug) ? waiter.resolve(prices[slug] ?? []) : enqueue(slug, waiter),
         );
       })
       .catch((error) => settle((waiter) => waiter.reject(error)));
@@ -38,8 +40,8 @@ function flush() {
 }
 
 const loadPrice = (slug: string) =>
-  new Promise<Price | null>((resolve, reject) => {
-    if (!SLUG.test(slug)) return resolve(null);
+  new Promise<Price[]>((resolve, reject) => {
+    if (!SLUG.test(slug)) return resolve([]);
     enqueue(slug, { resolve, reject });
   });
 
@@ -51,14 +53,22 @@ const priceQuery = (slug: string) =>
     retryOnMount: false,
   });
 
-export const usePrice = (slug: string) => useQuery(priceQuery(slug));
+export const usePrice = (slug: string) => {
+  const stores = usePriceStores();
+  return useQuery({ ...priceQuery(slug), select: (prices) => bestPrice(prices, stores) });
+};
 
-export const usePrices = (slugs: string[]) =>
-  useQueries({
-    queries: slugs.map((slug) => priceQuery(slug)),
+export const usePrices = (slugs: string[]) => {
+  const stores = usePriceStores();
+  return useQueries({
+    queries: slugs.map((slug) => ({
+      ...priceQuery(slug),
+      select: (prices: Price[]) => bestPrice(prices, stores),
+    })),
     combine: (results) => ({
       prices: Object.fromEntries(slugs.map((slug, i) => [slug, results[i].data])),
       pending: results.some((result) => result.isPending),
       failed: results.some((result) => result.isLoadingError),
     }),
   });
+};

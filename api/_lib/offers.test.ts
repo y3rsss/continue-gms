@@ -18,8 +18,8 @@ describe("whereToBuy", () => {
     fakePriceApis();
     const { offers } = await whereToBuy("hollow-knight", memoryStore());
     expect(offers).toEqual([
-      { store: "GOG", url: "https://itad.link/gog", price: 9.99, regularPrice: 14.99 },
-      { store: "Steam", url: "https://itad.link/steam", price: 14.99, regularPrice: 14.99 },
+      { store: "GOG", shopId: 35, url: "https://itad.link/gog", price: 9.99, regularPrice: 14.99 },
+      { store: "Steam", shopId: 61, url: "https://itad.link/steam", price: 14.99, regularPrice: 14.99 },
       {
         store: "Nintendo eShop",
         url: "https://www.nintendo.com/games/detail/hollow-knight-switch",

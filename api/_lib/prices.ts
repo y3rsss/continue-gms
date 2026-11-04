@@ -91,7 +91,9 @@ export async function priceRows(slugs: string[], store: PriceStore, hints: Steam
   const deferred = unseen.slice(LOOKUPS_PER_REQUEST);
   const stale = slugs.filter((slug) => {
     const row = rows.get(slug);
-    return !!row?.itad_id && age(row) > PRICES_TTL;
+    return (
+      !!row?.itad_id && (age(row) > PRICES_TTL || row.offers.some((offer) => offer.shopId === undefined))
+    );
   });
   if (!lookups.length && !stale.length) return { rows, deferred };
 
@@ -125,8 +127,15 @@ export async function priceRows(slugs: string[], store: PriceStore, hints: Steam
   return { rows, deferred };
 }
 
-export function cheapest(row: PriceRow | undefined): Price | null {
-  const offer = row?.offers[0];
-  if (!offer || offer.price === null || offer.regularPrice === null) return null;
-  return { amount: offer.price, regular: offer.regularPrice, store: offer.store };
-}
+export const storePrices = (row: PriceRow | undefined): Price[] =>
+  (row?.offers ?? []).flatMap((offer) =>
+    offer.price === null || offer.regularPrice === null
+      ? []
+      : [
+          {
+            amount: offer.price,
+            regular: offer.regularPrice,
+            shopId: offer.shopId ?? null,
+          },
+        ],
+  );

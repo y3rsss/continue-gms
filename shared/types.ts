@@ -39,6 +39,8 @@ export interface GameDetails extends Game {
 
 export interface StoreOffer {
   store: string;
+  /** IsThereAnyDeal shop id, missing on store links from RAWG */
+  shopId?: number;
   url: string;
   /** USD, null when the store has no price data (consoles, mobile) */
   price: number | null;
@@ -55,14 +57,22 @@ export interface WhereToBuy {
   lowestEver: LowestEver | null;
 }
 
-/** the cheapest PC offer right now, USD */
+/** one store's PC price right now, USD */
 export interface Price {
   amount: number;
   regular: number;
-  store: string;
+  shopId: number | null;
 }
 
-export type Prices = Partial<Record<string, Price | null>>;
+/** each game's prices cheapest first, a game left out is asked for again */
+export interface PricesAnswer {
+  prices: Partial<Record<string, Price[]>>;
+}
+
+export interface Shop {
+  id: number;
+  name: string;
+}
 
 export interface GamesPage {
   results: Game[];

@@ -8,6 +8,7 @@ import { STATUSES, type BacklogEntry, type Status } from "../hooks/useBacklog";
 import { usePrices } from "../hooks/usePrice";
 import FilterMenu from "./FilterMenu";
 import GameCard, { GameCardSkeleton } from "./GameCard";
+import PriceStoresMenu from "./PriceStoresMenu";
 import Tab from "./Tab";
 
 const order = Object.keys(STATUSES) as Status[];
@@ -68,7 +69,7 @@ const BacklogView = ({ entries, loading, empty }: Props) => {
             </Tab>
           ))}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           <Tab active={sale} onClick={() => setParam("sale", sale ? undefined : "1")}>
             <Tag aria-hidden className="size-3 shrink-0" strokeWidth={2.5} />
             On sale {!pending && !failed && onSale.length}
@@ -79,6 +80,7 @@ const BacklogView = ({ entries, loading, empty }: Props) => {
             value={sort}
             onChange={(value) => setParam("sort", value === "recent" ? undefined : value)}
           />
+          <PriceStoresMenu />
         </div>
       </div>
 

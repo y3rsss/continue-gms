@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
-import type { Game, Prices } from "../shared/types";
+import type { Game, Price, PricesAnswer } from "../shared/types";
 
 const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8");
 
@@ -12,12 +12,13 @@ export const game = (slug: string) => {
   return found;
 };
 
-const prices: Prices = JSON.parse(fixture("prices"));
+const prices: Record<string, Price[]> = JSON.parse(fixture("prices"));
 
-export const pricesFor = (url: URL) =>
-  Object.fromEntries(
-    (url.searchParams.get("slugs")?.split(",") ?? []).map((slug) => [slug, prices[slug] ?? null]),
-  );
+export const pricesFor = (url: URL): PricesAnswer => ({
+  prices: Object.fromEntries(
+    (url.searchParams.get("slugs")?.split(",") ?? []).map((slug) => [slug, prices[slug] ?? []]),
+  ),
+});
 
 function fixtureFor(url: URL): string | null {
   switch (url.pathname) {
@@ -30,6 +31,8 @@ function fixtureFor(url: URL): string | null {
       return "game";
     case "/api/stores":
       return "stores";
+    case "/api/shops":
+      return "shops";
     case "/api/genres":
       return "genres";
     case "/api/platforms":

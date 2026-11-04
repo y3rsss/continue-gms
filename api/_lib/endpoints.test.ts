@@ -3,6 +3,7 @@ import { GET as game } from "../game.js";
 import { GET as games } from "../games.js";
 import { GET as prices } from "../prices.js";
 import { GET as search } from "../search.js";
+import { GET as shops } from "../shops.js";
 import { GET as stores } from "../stores.js";
 import { fakeFetch } from "./fake-fetch.js";
 import type { PriceRow } from "./prices.js";
@@ -32,6 +33,7 @@ beforeEach(() => {
   copies.clear();
   savedPrices.length = 0;
   process.env.RAWG_API_KEY = "test-key";
+  process.env.ITAD_API_KEY = "itad-key";
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -196,6 +198,15 @@ describe("saved copies", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ offers: [gog], lowestEver: null });
     expect(response.headers.get("Cache-Control")).toContain("s-maxage=60,");
+  });
+
+  it("the shop list falls back to its saved copy while IsThereAnyDeal is down", async () => {
+    fakeFetch(() => [{ id: 61, title: "Steam", games: 328305 }]);
+    expect(await (await call(shops, "/api/shops")).json()).toEqual([{ id: 61, name: "Steam" }]);
+    fakeFetch(() => new Response("down", { status: 503 }));
+    const response = await call(shops, "/api/shops");
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([{ id: 61, name: "Steam" }]);
   });
 
   it("doesn't save search results", async () => {
